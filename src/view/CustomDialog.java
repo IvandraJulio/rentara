@@ -24,7 +24,7 @@ public class CustomDialog extends JDialog {
         super(parent, ModalityType.APPLICATION_MODAL);
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 0)); // Transparan untuk sudut membulat sempurna
-        setSize(440, 240);
+        setSize(420, 230);
         setLocationRelativeTo(parent);
 
         // Panel Kontainer Utama dengan Sudut Membulat
@@ -196,16 +196,15 @@ public class CustomDialog extends JDialog {
             contentPanel.add(lblMsg);
         }
 
-        // 3. Bottom Button Row ("Tutup" & Primary Action Button)
-        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        // 3. Bottom Button Row ("Tutup" & Primary Action Button) - Grid 2 Kolom Penuh
+        JPanel btnRow = new JPanel(new GridLayout(1, 2, 12, 0));
         btnRow.setOpaque(false);
+        btnRow.setPreferredSize(new Dimension(0, 44));
 
         UIComponents.ModernButton btnTutup = new UIComponents.ModernButton("Tutup", UIComponents.ModernButton.Type.SECONDARY);
-        btnTutup.setPreferredSize(new Dimension(110, 42));
         btnTutup.addActionListener(e -> dispose());
 
         UIComponents.ModernButton btnAction = new UIComponents.ModernButton(primaryBtnText, UIComponents.ModernButton.Type.PRIMARY);
-        btnAction.setPreferredSize(new Dimension(140, 42));
         btnAction.addActionListener(e -> {
             dispose();
             if (onPrimaryAction != null) {
