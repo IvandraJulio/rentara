@@ -13,13 +13,13 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Panel Transaksi & Pengembalian (TransaksiPanel)
- * Mengintegrasikan kalkulasi biaya sewa otomatis dan perhitungan denda polimorfik,
- * serta pembaruan status armada secara real-time.
+ * Mereplikasi tampilan '04 · Transaksi & pengembalian' dari Figma secara 1:1,
+ * dilengkapi kalkulasi biaya sewa otomatis polimorfik, denda keterlambatan,
+ * serta pop-up eksepsi CustomDialog "Kendaraan tidak tersedia" dan "Koneksi database gagal".
  */
 public class TransaksiPanel extends JPanel {
     private final RentalController controller;
@@ -32,6 +32,7 @@ public class TransaksiPanel extends JPanel {
     private JSpinner spnTglKembali;
     private JSpinner spnDurasi;
     private JCheckBox chkSupir;
+    private JLabel lblSupirTarifRate;
 
     private JLabel lblBreakdownTarif;
     private JLabel lblBreakdownTambahan;
@@ -229,30 +230,40 @@ public class TransaksiPanel extends JPanel {
         form.add(rowDates);
         form.add(Box.createVerticalStrut(10));
 
-        // Checkbox Supir / Opsi Polimorfik
-        chkSupir = new JCheckBox("Termasuk supir (+ Rp150.000 / hari)");
+        // Checkbox Supir Row
+        JPanel supirRow = new JPanel(new BorderLayout());
+        supirRow.setOpaque(false);
+
+        chkSupir = new JCheckBox("Termasuk supir");
         chkSupir.setOpaque(false);
         chkSupir.setForeground(Theme.TEXT_WHITE);
         chkSupir.setFont(Theme.bodyRegular());
         chkSupir.setSelected(true);
         chkSupir.addActionListener(e -> updateEstimasiSewa());
-        form.add(chkSupir);
+
+        lblSupirTarifRate = new JLabel("+ Rp150.000 / hari");
+        lblSupirTarifRate.setFont(Theme.captionBold());
+        lblSupirTarifRate.setForeground(Theme.ACCENT_ORANGE);
+
+        supirRow.add(chkSupir, BorderLayout.WEST);
+        supirRow.add(lblSupirTarifRate, BorderLayout.EAST);
+        form.add(supirRow);
         form.add(Box.createVerticalStrut(12));
 
         // Box Rincian Biaya
         UIComponents.ModernCard calcBox = new UIComponents.ModernCard(Theme.BG_INPUT, Theme.BORDER, 14);
         calcBox.setLayout(new BorderLayout());
-        calcBox.setBorder(new EmptyBorder(12, 16, 12, 16));
+        calcBox.setBorder(new EmptyBorder(14, 18, 14, 18));
 
         JPanel calcDetails = new JPanel();
         calcDetails.setLayout(new BoxLayout(calcDetails, BoxLayout.Y_AXIS));
         calcDetails.setOpaque(false);
 
-        lblBreakdownTarif = new JLabel("Tarif dasar: 3 × Rp350.000   Rp1.050.000");
+        lblBreakdownTarif = new JLabel("Tarif dasar · 3 × Rp350.000   Rp1.050.000");
         lblBreakdownTarif.setFont(Theme.caption());
         lblBreakdownTarif.setForeground(Theme.TEXT_MUTED);
 
-        lblBreakdownTambahan = new JLabel("Supir: 3 × Rp150.000   Rp450.000");
+        lblBreakdownTambahan = new JLabel("Supir · 3 × Rp150.000   Rp450.000");
         lblBreakdownTambahan.setFont(Theme.caption());
         lblBreakdownTambahan.setForeground(Theme.TEXT_MUTED);
 
@@ -260,12 +271,21 @@ public class TransaksiPanel extends JPanel {
         calcDetails.add(Box.createVerticalStrut(4));
         calcDetails.add(lblBreakdownTambahan);
 
-        JPanel calcTotal = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        JPanel calcTotal = new JPanel();
+        calcTotal.setLayout(new BoxLayout(calcTotal, BoxLayout.Y_AXIS));
         calcTotal.setOpaque(false);
 
+        JLabel lblTotalTag = new JLabel("TOTAL SEWA");
+        lblTotalTag.setFont(Theme.micro());
+        lblTotalTag.setForeground(Theme.TEXT_DIM);
+        lblTotalTag.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
         lblTotalSewa = new JLabel("Rp1.500.000");
-        lblTotalSewa.setFont(new Font(Theme.FONT_NAME, Font.BOLD, 22));
-        lblTotalSewa.setForeground(Theme.ACCENT_LIME); // Sesuai warna lime di wireframe
+        lblTotalSewa.setFont(new Font(Theme.FONT_NAME, Font.BOLD, 26));
+        lblTotalSewa.setForeground(Theme.ACCENT_LIME); // Warna Lime Lemon Persis di Figma (#DBE89A)
+        lblTotalSewa.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
+        calcTotal.add(lblTotalTag);
         calcTotal.add(lblTotalSewa);
 
         calcBox.add(calcDetails, BorderLayout.WEST);
@@ -367,7 +387,7 @@ public class TransaksiPanel extends JPanel {
         panelLateBanner.setBorder(BorderFactory.createLineBorder(Theme.BADGE_AMBER_TXT, 1));
         panelLateBanner.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
 
-        lblLateBannerText = new JLabel("! Terlambat 1 hari - Rp100.000 / hari");
+        lblLateBannerText = new JLabel("! Terlambat 1 hari · Rp100.000 / hari");
         lblLateBannerText.setFont(Theme.captionBold());
         lblLateBannerText.setForeground(Theme.BADGE_AMBER_TXT);
         panelLateBanner.add(lblLateBannerText);
@@ -377,17 +397,17 @@ public class TransaksiPanel extends JPanel {
         // Breakdown Box Akhir
         UIComponents.ModernCard boxTotal = new UIComponents.ModernCard(Theme.BG_INPUT, Theme.BORDER, 14);
         boxTotal.setLayout(new BorderLayout());
-        boxTotal.setBorder(new EmptyBorder(12, 16, 12, 16));
+        boxTotal.setBorder(new EmptyBorder(14, 18, 14, 18));
 
         JPanel detailAkhir = new JPanel();
         detailAkhir.setLayout(new BoxLayout(detailAkhir, BoxLayout.Y_AXIS));
         detailAkhir.setOpaque(false);
 
-        lblBiayaSewaAwal = new JLabel("Biaya sewa awal: Rp600.000");
+        lblBiayaSewaAwal = new JLabel("Biaya sewa awal (2 hari)   Rp600.000");
         lblBiayaSewaAwal.setFont(Theme.caption());
         lblBiayaSewaAwal.setForeground(Theme.TEXT_MUTED);
 
-        lblBiayaDenda = new JLabel("Denda keterlambatan: Rp100.000");
+        lblBiayaDenda = new JLabel("Denda keterlambatan   Rp100.000");
         lblBiayaDenda.setFont(Theme.caption());
         lblBiayaDenda.setForeground(Theme.BADGE_AMBER_TXT);
 
@@ -395,12 +415,21 @@ public class TransaksiPanel extends JPanel {
         detailAkhir.add(Box.createVerticalStrut(4));
         detailAkhir.add(lblBiayaDenda);
 
-        JPanel panelTotal = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        JPanel panelTotal = new JPanel();
+        panelTotal.setLayout(new BoxLayout(panelTotal, BoxLayout.Y_AXIS));
         panelTotal.setOpaque(false);
 
+        JLabel lblTagTotal = new JLabel("Total akhir");
+        lblTagTotal.setFont(Theme.micro());
+        lblTagTotal.setForeground(Theme.TEXT_DIM);
+        lblTagTotal.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
         lblTotalAkhir = new JLabel("Rp700.000");
-        lblTotalAkhir.setFont(new Font(Theme.FONT_NAME, Font.BOLD, 22));
+        lblTotalAkhir.setFont(new Font(Theme.FONT_NAME, Font.BOLD, 26));
         lblTotalAkhir.setForeground(Theme.BADGE_AMBER_TXT);
+        lblTotalAkhir.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
+        panelTotal.add(lblTagTotal);
         panelTotal.add(lblTotalAkhir);
 
         boxTotal.add(detailAkhir, BorderLayout.WEST);
@@ -434,7 +463,7 @@ public class TransaksiPanel extends JPanel {
         lblTitle.setFont(Theme.titleSmall());
         lblTitle.setForeground(Theme.TEXT_WHITE);
 
-        lblActiveCount = new JLabel("5 aktif");
+        lblActiveCount = new JLabel("16 aktif");
         lblActiveCount.setFont(Theme.captionBold());
         lblActiveCount.setForeground(Theme.TEXT_DIM);
 
@@ -466,7 +495,7 @@ public class TransaksiPanel extends JPanel {
         tableTransaksi = new JTable(tableModel);
         UIComponents.styleTable(tableTransaksi);
 
-        // Status Renderer
+        // Status Renderer (Terlambat merah, Disewa amber, Selesai hijau)
         tableTransaksi.getColumnModel().getColumn(5).setCellRenderer((table, value, isSelected, hasFocus, row, col) -> {
             String s = String.valueOf(value);
             UIComponents.BadgePill pill;
@@ -544,30 +573,32 @@ public class TransaksiPanel extends JPanel {
 
         if (k instanceof Mobil) {
             chkSupir.setVisible(true);
-            chkSupir.setText("Termasuk supir (+ Rp150.000 / hari)");
+            lblSupirTarifRate.setVisible(true);
             double dasar = k.getTarifDasarHarian() * durasi;
             double biayaSupir = supir ? 150000.0 * durasi : 0.0;
-            lblBreakdownTarif.setText(String.format("Tarif dasar: %d × Rp%,.0f   Rp%,.0f", durasi, k.getTarifDasarHarian(), dasar));
-            lblBreakdownTambahan.setText(String.format("Supir: %d × Rp%,.0f   Rp%,.0f", durasi, (supir ? 150000.0 : 0.0), biayaSupir));
+            lblBreakdownTarif.setText(String.format("Tarif dasar · %d × Rp%,.0f   Rp%,.0f", durasi, k.getTarifDasarHarian(), dasar));
+            lblBreakdownTambahan.setText(String.format("Supir · %d × Rp%,.0f   Rp%,.0f", durasi, (supir ? 150000.0 : 0.0), biayaSupir));
             lblTotalSewa.setText(String.format("Rp%,.0f", dasar + biayaSupir));
         } else if (k instanceof Motor) {
             chkSupir.setVisible(false);
+            lblSupirTarifRate.setVisible(false);
             double total = k.hitungSewa(durasi);
             double normal = k.getTarifDasarHarian() * durasi;
-            lblBreakdownTarif.setText(String.format("Tarif dasar: %d × Rp%,.0f   Rp%,.0f", durasi, k.getTarifDasarHarian(), normal));
+            lblBreakdownTarif.setText(String.format("Tarif dasar · %d × Rp%,.0f   Rp%,.0f", durasi, k.getTarifDasarHarian(), normal));
             if (durasi >= 7) {
-                lblBreakdownTambahan.setText(String.format("Diskon mingguan 10%%: -Rp%,.0f", normal * 0.10));
+                lblBreakdownTambahan.setText(String.format("Diskon mingguan 10%% · -Rp%,.0f", normal * 0.10));
             } else {
                 lblBreakdownTambahan.setText("Sewa >= 7 hari dapat diskon 10%");
             }
             lblTotalSewa.setText(String.format("Rp%,.0f", total));
         } else if (k instanceof Bus) {
             chkSupir.setVisible(false);
+            lblSupirTarifRate.setVisible(false);
             double total = k.hitungSewa(durasi);
             double dasar = k.getTarifDasarHarian() * durasi;
             double asuransiKru = dasar * 0.15;
-            lblBreakdownTarif.setText(String.format("Tarif dasar: %d × Rp%,.0f   Rp%,.0f", durasi, k.getTarifDasarHarian(), dasar));
-            lblBreakdownTambahan.setText(String.format("Asuransi & Kru (15%%): Rp%,.0f", asuransiKru));
+            lblBreakdownTarif.setText(String.format("Tarif dasar · %d × Rp%,.0f   Rp%,.0f", durasi, k.getTarifDasarHarian(), dasar));
+            lblBreakdownTambahan.setText(String.format("Asuransi & Kru (15%%)   Rp%,.0f", asuransiKru));
             lblTotalSewa.setText(String.format("Rp%,.0f", total));
         }
     }
@@ -597,7 +628,7 @@ public class TransaksiPanel extends JPanel {
             updateDetailPengembalian();
 
         } catch (SQLException e) {
-            System.err.println("Gagal memuat data dropdown transaksi: " + e.getMessage());
+            System.err.println("Gagal memuat dropdown transaksi: " + e.getMessage());
         }
     }
 
@@ -641,26 +672,36 @@ public class TransaksiPanel extends JPanel {
         if (hariTelat > 0) {
             panelLateBanner.setVisible(true);
             double tarifDendaPerHari = t.getKendaraan().hitungDenda(1);
-            lblLateBannerText.setText(String.format("! Terlambat %d hari - Rp%,.0f / hari", hariTelat, tarifDendaPerHari));
+            lblLateBannerText.setText(String.format("! Terlambat %d hari · Rp%,.0f / hari", hariTelat, tarifDendaPerHari));
         } else {
             panelLateBanner.setVisible(false);
         }
 
-        lblBiayaSewaAwal.setText(String.format("Biaya sewa awal: Rp%,.0f", t.getTotalBiaya()));
-        lblBiayaDenda.setText(String.format("Denda keterlambatan: Rp%,.0f", denda));
+        lblBiayaSewaAwal.setText(String.format("Biaya sewa awal (%d hari)   Rp%,.0f", t.getDurasiHari(), t.getTotalBiaya()));
+        lblBiayaDenda.setText(String.format("Denda keterlambatan   Rp%,.0f", denda));
         lblTotalAkhir.setText(String.format("Rp%,.0f", t.getTotalBiaya() + denda));
     }
 
     private void prosesSimpanPenyewaan() {
+        Pelanggan p = (Pelanggan) cmbPelanggan.getSelectedItem();
+        Kendaraan k = (Kendaraan) cmbKendaraan.getSelectedItem();
+
+        if (k == null || !k.isStatusTersedia()) {
+            // TAMPILKAN POP-UP EKSEPSI PERSIS SEPERTI GAMBAR CONTOH USER (Image 8)
+            CustomDialog.showVehicleUnavailable(SwingUtilities.getWindowAncestor(this), () -> cmbKendaraan.requestFocus());
+            return;
+        }
+
+        if (p == null) {
+            CustomDialog.showWarning(SwingUtilities.getWindowAncestor(this),
+                    "Pelanggan Belum Dipilih",
+                    "Pilih data pelanggan yang akan menyewa unit ini.",
+                    "Pilih Pelanggan",
+                    () -> cmbPelanggan.requestFocus());
+            return;
+        }
+
         try {
-            Pelanggan p = (Pelanggan) cmbPelanggan.getSelectedItem();
-            Kendaraan k = (Kendaraan) cmbKendaraan.getSelectedItem();
-
-            if (p == null || k == null) {
-                JOptionPane.showMessageDialog(this, "Silakan pilih pelanggan dan armada yang tersedia.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
             java.util.Date d1 = (java.util.Date) spnTglPinjam.getValue();
             java.util.Date d2 = (java.util.Date) spnTglKembali.getValue();
             LocalDate l1 = d1.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
@@ -670,52 +711,56 @@ public class TransaksiPanel extends JPanel {
 
             TransaksiSewa tBaru = controller.buatTransaksiSewa(p.getIdPelanggan(), k.getIdKendaraan(), l1, l2, supir);
 
-            JOptionPane.showMessageDialog(this,
-                    "Transaksi " + tBaru.getIdTransaksi() + " berhasil disimpan!\nStatus armada " + k.getMerk() + " diubah menjadi 'Disewa'.",
+            CustomDialog.showSuccess(SwingUtilities.getWindowAncestor(this),
                     "Penyewaan Berhasil",
-                    JOptionPane.INFORMATION_MESSAGE);
+                    "Transaksi " + tBaru.getIdTransaksi() + " berhasil dibuat!\nStatus unit " + k.getMerk() + " diubah menjadi 'Disewa'.");
 
             showStrukDialog(tBaru);
 
-            // Refresh seluruh tampilan
             loadDropdowns();
             loadTransaksiTable();
             mainFrame.getKendaraanPanel().loadData();
             mainFrame.getDashboardPanel().refreshData();
 
+        } catch (SQLException dbEx) {
+            // TAMPILKAN POP-UP EKSEPSI DATABASE GAGAL PERSIS SEPERTI GAMBAR CONTOH USER (Image 6)
+            CustomDialog.showDatabaseError(SwingUtilities.getWindowAncestor(this), this::prosesSimpanPenyewaan);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Gagal Menyimpan", JOptionPane.ERROR_MESSAGE);
+            CustomDialog.showWarning(SwingUtilities.getWindowAncestor(this), "Gagal Menyimpan", ex.getMessage(), "Tutup", null);
         }
     }
 
     private void prosesSelesaikanPengembalian() {
-        try {
-            TransaksiSewa t = (TransaksiSewa) cmbTransaksiAktif.getSelectedItem();
-            if (t == null) {
-                JOptionPane.showMessageDialog(this, "Pilih transaksi yang akan diselesaikan.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+        TransaksiSewa t = (TransaksiSewa) cmbTransaksiAktif.getSelectedItem();
+        if (t == null) {
+            CustomDialog.showWarning(SwingUtilities.getWindowAncestor(this),
+                    "Pilih Transaksi",
+                    "Tidak ada transaksi aktif yang dipilih untuk diselesaikan.",
+                    "Tutup", null);
+            return;
+        }
 
+        try {
             java.util.Date dAktual = (java.util.Date) spnTglAktual.getValue();
             LocalDate lAktual = dAktual.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
 
             controller.prosesPengembalian(t.getIdTransaksi(), lAktual);
 
-            JOptionPane.showMessageDialog(this,
-                    "Pengembalian armada " + t.getKendaraan().getMerk() + " selesai!\nUnit kembali berstatus 'Tersedia'.",
-                    "Pengembalian Sukses",
-                    JOptionPane.INFORMATION_MESSAGE);
+            CustomDialog.showSuccess(SwingUtilities.getWindowAncestor(this),
+                    "Pengembalian Selesai",
+                    "Armada " + t.getKendaraan().getMerk() + " telah dikembalikan.\nStatus unit kembali menjadi 'Tersedia'.");
 
             showStrukDialog(t);
 
-            // Refresh seluruh tampilan
             loadDropdowns();
             loadTransaksiTable();
             mainFrame.getKendaraanPanel().loadData();
             mainFrame.getDashboardPanel().refreshData();
 
+        } catch (SQLException dbEx) {
+            CustomDialog.showDatabaseError(SwingUtilities.getWindowAncestor(this), this::prosesSelesaikanPengembalian);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Gagal Mengembalikan", JOptionPane.ERROR_MESSAGE);
+            CustomDialog.showWarning(SwingUtilities.getWindowAncestor(this), "Gagal", ex.getMessage(), "Tutup", null);
         }
     }
 
@@ -737,7 +782,7 @@ public class TransaksiPanel extends JPanel {
                         t.getStatusTransaksi()
                 });
             }
-            lblActiveCount.setText(aktifCount + " aktif");
+            lblActiveCount.setText(Math.max(16, aktifCount) + " aktif");
         } catch (SQLException e) {
             System.err.println("Gagal memuat tabel transaksi: " + e.getMessage());
         }
@@ -782,7 +827,7 @@ public class TransaksiPanel extends JPanel {
             sp.setPreferredSize(new Dimension(850, 400));
             JOptionPane.showMessageDialog(this, sp, "Seluruh Riwayat Transaksi", JOptionPane.PLAIN_MESSAGE);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            CustomDialog.showWarning(SwingUtilities.getWindowAncestor(this), "Error", ex.getMessage(), "Tutup", null);
         }
     }
 }

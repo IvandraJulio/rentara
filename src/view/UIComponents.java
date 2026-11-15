@@ -1,7 +1,6 @@
 package view;
 
 import javax.swing.*;
-import javax.swing.border.AbstractBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
@@ -39,6 +38,11 @@ public class UIComponents {
 
         public void setBgColor(Color bgColor) {
             this.bgColor = bgColor;
+            repaint();
+        }
+
+        public void setBorderColor(Color borderColor) {
+            this.borderColor = borderColor;
             repaint();
         }
 
@@ -169,11 +173,12 @@ public class UIComponents {
     }
 
     /**
-     * Input Teks Modern (ModernTextField) dengan Placeholder & Focus Border
+     * Input Teks Modern (ModernTextField) dengan Placeholder, Focus Border, & Error Border
      */
     public static class ModernTextField extends JTextField {
         private String placeholder = "";
         private boolean isFocused = false;
+        private boolean hasError = false;
         private int radius = 10;
 
         public ModernTextField() {
@@ -209,6 +214,15 @@ public class UIComponents {
             repaint();
         }
 
+        public void setError(boolean error) {
+            this.hasError = error;
+            repaint();
+        }
+
+        public boolean isHasError() {
+            return hasError;
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
@@ -220,8 +234,11 @@ public class UIComponents {
             g2.setColor(Theme.BG_INPUT);
             g2.fill(new RoundRectangle2D.Float(0, 0, w, h, radius, radius));
 
-            // Border
-            if (isFocused) {
+            // Border: Merah jika error, Oranye jika fokus, Abu-abu jika default
+            if (hasError) {
+                g2.setColor(Theme.BADGE_RED_TXT);
+                g2.setStroke(new BasicStroke(1.5f));
+            } else if (isFocused) {
                 g2.setColor(Theme.ACCENT_ORANGE);
                 g2.setStroke(new BasicStroke(1.5f));
             } else {
@@ -276,7 +293,7 @@ public class UIComponents {
                 }
             });
 
-            // Klik kanan / area kanan untuk toggle lihat password
+            // Klik ikon mata di sisi kanan untuk melihat password
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {

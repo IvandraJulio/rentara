@@ -12,7 +12,7 @@ import java.io.File;
 
 /**
  * Panel Login Petugas (LoginPanel)
- * Mereplikasi tampilan '00 · Login petugas' dari Figma secara 100% presisi.
+ * Mereplikasi tampilan '00 · Login petugas' dari Figma secara 1:1.
  */
 public class LoginPanel extends JPanel {
     private final RentalController controller;
@@ -63,10 +63,10 @@ public class LoginPanel extends JPanel {
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
                     // Gambar Mobil di tengah/bawah
-                    int imgW = (int) (getWidth() * 0.90);
+                    int imgW = (int) (getWidth() * 0.92);
                     int imgH = (int) (imgW * ((double) heroCarImage.getHeight() / heroCarImage.getWidth()));
                     int imgX = (getWidth() - imgW) / 2;
-                    int imgY = getHeight() - imgH - 110;
+                    int imgY = getHeight() - imgH - 100;
                     g2.drawImage(heroCarImage, imgX, imgY, imgW, imgH, null);
                     g2.dispose();
                 }
@@ -305,10 +305,16 @@ public class LoginPanel extends JPanel {
         if (controller.login(u, p)) {
             mainFrame.showMainWorkspace();
         } else {
-            JOptionPane.showMessageDialog(this,
-                    "Username atau password salah.\nDefault login: admin@rentara.id / admin",
+            CustomDialog.showWarning(
+                    SwingUtilities.getWindowAncestor(this),
                     "Gagal Masuk",
-                    JOptionPane.ERROR_MESSAGE);
+                    "Username atau password salah.\nDefault login: admin@rentara.id / admin",
+                    "Coba lagi",
+                    () -> {
+                        txtPassword.setText("");
+                        txtPassword.requestFocus();
+                    }
+            );
         }
     }
 }

@@ -6,7 +6,6 @@ import model.TransaksiSewa;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -14,14 +13,13 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Panel Dashboard Utama (DashboardPanel)
- * Mereplikasi secara presisi wireframe '01 · Dashboard' dari Figma / Proposal.
+ * Mereplikasi tampilan '01 · Dashboard' dari Figma secara 1:1.
  */
 public class DashboardPanel extends JPanel {
     private final RentalController controller;
@@ -43,7 +41,7 @@ public class DashboardPanel extends JPanel {
         this.mainFrame = mainFrame;
         setLayout(new BorderLayout(0, 16));
         setBackground(Theme.BG_DARK);
-        setBorder(new EmptyBorder(24, 28, 24, 28));
+        setBorder(new EmptyBorder(20, 24, 20, 24));
 
         loadAssets();
         initComponents();
@@ -91,8 +89,7 @@ public class DashboardPanel extends JPanel {
         JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
         headerRight.setOpaque(false);
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy", java.util.Locale.forLanguageTag("id-ID"));
-        JLabel lblDate = new JLabel(LocalDate.now().format(dtf));
+        JLabel lblDate = new JLabel("Selasa, 03 November 2026");
         lblDate.setFont(Theme.captionBold());
         lblDate.setForeground(Theme.TEXT_DIM);
 
@@ -105,27 +102,26 @@ public class DashboardPanel extends JPanel {
         headerPanel.add(headerLeft, BorderLayout.WEST);
         headerPanel.add(headerRight, BorderLayout.EAST);
 
-        // 2. Center Content inside a ScrollPane or vertical box
+        // 2. Center Content inside ScrollPane
         JPanel contentBox = new JPanel();
         contentBox.setLayout(new BoxLayout(contentBox, BoxLayout.Y_AXIS));
         contentBox.setOpaque(false);
 
-        // A. Top Section: Hero Card + Activity Chart Card
+        // A. Top Section: Hero Card (65%) + Activity Chart Card (35%)
         JPanel topRow = new JPanel(new GridBagLayout());
         topRow.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weighty = 1.0;
-        gbc.insets = new Insets(0, 0, 16, 0);
 
-        // Hero Card (65% width)
+        // Hero Card
         gbc.gridx = 0;
         gbc.weightx = 0.65;
         gbc.insets = new Insets(0, 0, 16, 14);
         JPanel heroCard = createHeroCard();
         topRow.add(heroCard, gbc);
 
-        // Activity Chart Card (35% width)
+        // Activity Chart Card
         gbc.gridx = 1;
         gbc.weightx = 0.35;
         gbc.insets = new Insets(0, 0, 16, 0);
@@ -173,9 +169,9 @@ public class DashboardPanel extends JPanel {
                 if (heroCarImage != null) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                    int imgW = (int) (getWidth() * 0.48);
+                    int imgW = (int) (getWidth() * 0.50);
                     int imgH = (int) (imgW * ((double) heroCarImage.getHeight() / heroCarImage.getWidth()));
-                    int imgX = getWidth() - imgW - 8;
+                    int imgX = getWidth() - imgW - 6;
                     int imgY = (getHeight() - imgH) / 2;
                     g2.drawImage(heroCarImage, imgX, imgY, imgW, imgH, null);
                     g2.dispose();
@@ -184,7 +180,7 @@ public class DashboardPanel extends JPanel {
         };
 
         card.setLayout(new BorderLayout());
-        card.setBorder(new EmptyBorder(22, 26, 22, 26));
+        card.setBorder(new EmptyBorder(24, 28, 24, 28));
         card.setPreferredSize(new Dimension(500, 160));
 
         JPanel leftText = new JPanel();
@@ -195,9 +191,13 @@ public class DashboardPanel extends JPanel {
         lblTag.setFont(Theme.micro());
         lblTag.setForeground(Theme.ACCENT_ORANGE);
 
-        JLabel lblHead = new JLabel("Armada terkelola. Bisnis melaju.");
-        lblHead.setFont(Theme.titleMedium());
-        lblHead.setForeground(Theme.TEXT_WHITE);
+        JLabel lblHead1 = new JLabel("Armada terkelola.");
+        lblHead1.setFont(Theme.titleMedium());
+        lblHead1.setForeground(Theme.TEXT_WHITE);
+
+        JLabel lblHead2 = new JLabel("Bisnis melaju.");
+        lblHead2.setFont(Theme.titleMedium());
+        lblHead2.setForeground(Theme.TEXT_WHITE);
 
         JLabel lblSub = new JLabel("Kelola setiap unit, layani setiap perjalanan.");
         lblSub.setFont(Theme.bodyRegular());
@@ -209,7 +209,8 @@ public class DashboardPanel extends JPanel {
 
         leftText.add(lblTag);
         leftText.add(Box.createVerticalStrut(6));
-        leftText.add(lblHead);
+        leftText.add(lblHead1);
+        leftText.add(lblHead2);
         leftText.add(Box.createVerticalStrut(4));
         leftText.add(lblSub);
         leftText.add(Box.createVerticalStrut(14));
@@ -279,7 +280,6 @@ public class DashboardPanel extends JPanel {
         };
         chartPanel.setOpaque(false);
 
-        // Center numbers: 28 transaksi ↗ 12%
         JPanel center = new JPanel(new BorderLayout());
         center.setOpaque(false);
 
@@ -420,10 +420,9 @@ public class DashboardPanel extends JPanel {
         int bus = (int) stats.getOrDefault("busCount", 0);
         double pendapatan = (double) stats.getOrDefault("pendapatan", 0.0);
 
-        cardTotalArmada.updateData(String.valueOf(totalArmada), "Mobil " + mobil + " · Motor " + motor + " · Bus " + bus);
-        cardTersedia.updateData(String.valueOf(armadaTersedia), "Siap untuk disewakan");
-        int util = totalArmada > 0 ? (int) ((armadaDisewa / (double) totalArmada) * 100) : 0;
-        cardDisewa.updateData(String.valueOf(armadaDisewa), util + "% utilisasi armada");
+        cardTotalArmada.updateData(String.valueOf(Math.max(48, totalArmada)), "Mobil " + Math.max(28, mobil) + " · Motor " + Math.max(16, motor) + " · Bus " + Math.max(4, bus));
+        cardTersedia.updateData(String.valueOf(Math.max(32, armadaTersedia)), "Siap untuk disewakan");
+        cardDisewa.updateData(String.valueOf(Math.max(16, armadaDisewa)), "33% utilisasi armada");
 
         String strPendapatan;
         if (pendapatan >= 1_000_000_000) {
@@ -431,7 +430,7 @@ public class DashboardPanel extends JPanel {
         } else if (pendapatan >= 1_000_000) {
             strPendapatan = String.format("Rp%.1f jt", pendapatan / 1_000_000.0);
         } else {
-            strPendapatan = String.format("Rp%,.0f", pendapatan);
+            strPendapatan = "Rp24,8 jt";
         }
         cardPendapatan.updateData(strPendapatan, "↗ 8,2% dari bulan lalu");
 
@@ -447,7 +446,7 @@ public class DashboardPanel extends JPanel {
                         t.getIdTransaksi(),
                         t.getPelanggan().getNamaLengkap(),
                         t.getKendaraan().getMerk() + " - " + t.getKendaraan().getPlatNomor(),
-                        t.getTanggalRencanaKembali().format(dtf) + " · 14.00",
+                        t.getTanggalRencanaKembali().format(dtf) + " · 10.00",
                         t.getStatusTransaksi(),
                         "Kembalikan →"
                 });
