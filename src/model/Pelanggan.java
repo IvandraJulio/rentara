@@ -97,6 +97,6 @@ public class Pelanggan {
 
     @Override
     public String toString() {
-        return namaLengkap + " (" + idPelanggan + ")";
+        return namaLengkap + "  ·  " + idPelanggan;
     }
 }

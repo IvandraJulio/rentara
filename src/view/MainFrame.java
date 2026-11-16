@@ -2,20 +2,17 @@ package view;
 
 import controller.RentalController;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
 
 /**
  * Jendela Utama Aplikasi (MainFrame)
  * Memuat tata letak menyeluruh: Sidebar navigasi vertikal membulat, Top Header bar,
- * dan CardLayout antarmuka utama (Dashboard, Armada, Pelanggan, Transaksi).
+ * latar belakang ambient glow, dan CardLayout antarmuka utama (Dashboard, Armada, Pelanggan, Transaksi).
  */
 public class MainFrame extends JFrame {
     private final RentalController controller;
@@ -36,7 +33,6 @@ public class MainFrame extends JFrame {
     // Header Controls
     private JLabel lblBreadcrumb;
     private JLabel lblHeaderTitle;
-    private BufferedImage adminAvatar;
 
     // Sidebar Nav Buttons
     private SidebarNavButton btnNavDashboard;
@@ -49,23 +45,11 @@ public class MainFrame extends JFrame {
 
         setTitle("Rentara Management - Sistem Informasi Rental Kendaraan (MVC & DAO)");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1440, 960);
-        setMinimumSize(new Dimension(1120, 740));
+        setSize(1440, 1024);
+        setMinimumSize(new Dimension(1160, 760));
         setLocationRelativeTo(null);
 
-        loadAssets();
         initUI();
-    }
-
-    private void loadAssets() {
-        try {
-            File f = new File("assets/02_img_0.png");
-            if (f.exists()) {
-                adminAvatar = ImageIO.read(f);
-            }
-        } catch (Exception e) {
-            System.err.println("Gagal memuat avatar admin: " + e.getMessage());
-        }
     }
 
     private void initUI() {
@@ -88,8 +72,7 @@ public class MainFrame extends JFrame {
     }
 
     private JPanel createWorkspaceView() {
-        JPanel main = new JPanel(new BorderLayout());
-        main.setBackground(Theme.BG_DARK);
+        UIComponents.AmbientBackgroundPanel main = new UIComponents.AmbientBackgroundPanel(new BorderLayout());
 
         // A. Left Floating Sidebar
         JPanel sidebarWrapper = new JPanel(new BorderLayout());
@@ -102,7 +85,7 @@ public class MainFrame extends JFrame {
 
         // B. Right Main Area: Top Bar + Content Panels
         JPanel rightArea = new JPanel(new BorderLayout());
-        rightArea.setBackground(Theme.BG_DARK);
+        rightArea.setOpaque(false);
 
         JPanel topBar = createTopBar();
         rightArea.add(topBar, BorderLayout.NORTH);
@@ -110,7 +93,7 @@ public class MainFrame extends JFrame {
         // Panels CardLayout
         workspaceCardLayout = new CardLayout();
         workspaceCardPanel = new JPanel(workspaceCardLayout);
-        workspaceCardPanel.setBackground(Theme.BG_DARK);
+        workspaceCardPanel.setOpaque(false);
 
         dashboardPanel = new DashboardPanel(controller, this);
         kendaraanPanel = new KendaraanPanel(controller, this);
@@ -129,7 +112,6 @@ public class MainFrame extends JFrame {
     }
 
     private JPanel createSidebar() {
-        // Sidebar Pill Berbingkai Membulat persis seperti di Figma
         JPanel sidebar = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -140,13 +122,11 @@ public class MainFrame extends JFrame {
                 int w = getWidth();
                 int h = getHeight();
 
-                // Background gelap sidebar
                 g2.setColor(Theme.BG_SIDEBAR);
                 g2.fill(new RoundRectangle2D.Float(0, 0, w, h, 28, 28));
 
-                // Border halus
-                g2.setColor(new Color(0x28, 0x2A, 0x33));
-                g2.setStroke(new BasicStroke(1.2f));
+                g2.setColor(new Color(0xFF, 0xFF, 0xFF, 36));
+                g2.setStroke(new BasicStroke(1.1f));
                 g2.draw(new RoundRectangle2D.Float(0.6f, 0.6f, w - 1.2f, h - 1.2f, 28, 28));
 
                 g2.dispose();
@@ -154,7 +134,7 @@ public class MainFrame extends JFrame {
         };
         sidebar.setOpaque(false);
         sidebar.setPreferredSize(new Dimension(68, 0));
-        sidebar.setBorder(new EmptyBorder(18, 10, 18, 10));
+        sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
 
         // Top: Brand Icon Badge
         JPanel topLogo = new JPanel() {
@@ -164,23 +144,22 @@ public class MainFrame extends JFrame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Theme.ACCENT_ORANGE);
-                g2.fill(new RoundRectangle2D.Float(2, 0, 44, 44, 14, 14));
+                g2.fill(new RoundRectangle2D.Float(4, 0, 40, 40, 13, 13));
 
-                // Car icon glyph
                 g2.setColor(new Color(0x18, 0x19, 0x1D));
-                g2.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                g2.drawLine(15, 25, 18, 17);
-                g2.drawLine(18, 17, 30, 17);
-                g2.drawLine(30, 17, 33, 25);
-                g2.drawRoundRect(13, 24, 22, 10, 4, 4);
-                g2.fillOval(17, 29, 4, 4);
-                g2.fillOval(27, 29, 4, 4);
+                g2.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawLine(15, 22, 18, 15);
+                g2.drawLine(18, 15, 30, 15);
+                g2.drawLine(30, 15, 33, 22);
+                g2.drawRoundRect(13, 21, 22, 8, 3, 3);
+                g2.fillOval(17, 26, 3, 3);
+                g2.fillOval(28, 26, 3, 3);
                 g2.dispose();
             }
 
             @Override
             public Dimension getPreferredSize() {
-                return new Dimension(48, 44);
+                return new Dimension(48, 42);
             }
         };
         topLogo.setOpaque(false);
@@ -190,7 +169,7 @@ public class MainFrame extends JFrame {
         JPanel navCenter = new JPanel();
         navCenter.setLayout(new BoxLayout(navCenter, BoxLayout.Y_AXIS));
         navCenter.setOpaque(false);
-        navCenter.add(Box.createVerticalStrut(34));
+        navCenter.add(Box.createVerticalStrut(36));
 
         btnNavDashboard = new SidebarNavButton("DASHBOARD", true);
         btnNavArmada = new SidebarNavButton("ARMADA", false);
@@ -203,11 +182,11 @@ public class MainFrame extends JFrame {
         btnNavTransaksi.addActionListener(e -> showPage("TRANSAKSI"));
 
         navCenter.add(btnNavDashboard);
-        navCenter.add(Box.createVerticalStrut(14));
+        navCenter.add(Box.createVerticalStrut(12));
         navCenter.add(btnNavArmada);
-        navCenter.add(Box.createVerticalStrut(14));
+        navCenter.add(Box.createVerticalStrut(12));
         navCenter.add(btnNavPelanggan);
-        navCenter.add(Box.createVerticalStrut(14));
+        navCenter.add(Box.createVerticalStrut(12));
         navCenter.add(btnNavTransaksi);
 
         sidebar.add(navCenter, BorderLayout.CENTER);
@@ -230,7 +209,7 @@ public class MainFrame extends JFrame {
         });
 
         navBottom.add(btnHelp);
-        navBottom.add(Box.createVerticalStrut(12));
+        navBottom.add(Box.createVerticalStrut(10));
         navBottom.add(btnLogout);
 
         sidebar.add(navBottom, BorderLayout.SOUTH);
@@ -240,61 +219,70 @@ public class MainFrame extends JFrame {
 
     private JPanel createTopBar() {
         JPanel topBar = new JPanel(new BorderLayout());
-        topBar.setBackground(Theme.BG_DARK);
-        topBar.setBorder(new EmptyBorder(16, 24, 10, 24));
+        topBar.setOpaque(false);
+        topBar.setBorder(new EmptyBorder(18, 28, 8, 28));
 
         // Left Breadcrumb & Title
-        JPanel left = new JPanel();
-        left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
+        JPanel left = new JPanel(new GridLayout(2, 1, 0, 2));
         left.setOpaque(false);
+        left.setPreferredSize(new Dimension(320, 48));
 
-        lblBreadcrumb = new JLabel("Workspace / Dashboard");
+        lblBreadcrumb = new JLabel("Workspace  /  Dashboard");
         lblBreadcrumb.setFont(Theme.caption());
-        lblBreadcrumb.setForeground(Theme.TEXT_DIM);
+        lblBreadcrumb.setForeground(Theme.TEXT_MUTED);
 
         lblHeaderTitle = new JLabel("Rentara Management");
-        lblHeaderTitle.setFont(Theme.titleMedium());
+        lblHeaderTitle.setFont(new Font(Theme.FONT_NAME, Font.BOLD, 18));
         lblHeaderTitle.setForeground(Theme.TEXT_WHITE);
 
         left.add(lblBreadcrumb);
         left.add(lblHeaderTitle);
 
-        // Center / Right Controls
-        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
+        // Right Controls
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         right.setOpaque(false);
 
-        // Search Input
-        UIComponents.ModernTextField searchGlobal = new UIComponents.ModernTextField("Cari di workspace...   ⌘ K");
-        searchGlobal.setPreferredSize(new Dimension(280, 38));
+        // Search Input with Search Icon & Shortcut Badge
+        UIComponents.ModernTextField searchGlobal = new UIComponents.ModernTextField("Cari di workspace...");
+        searchGlobal.setSearchStyle(true, true);
+        searchGlobal.setPreferredSize(new Dimension(280, 42));
         right.add(searchGlobal);
 
-        // Notification Bell
+        // Notification Bell Button
         JPanel bellBtn = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Theme.BG_CARD);
-                g2.fill(new RoundRectangle2D.Float(0, 0, 38, 38, 10, 10));
-                g2.setColor(Theme.BORDER);
-                g2.draw(new RoundRectangle2D.Float(0.6f, 0.6f, 36.8f, 36.8f, 10, 10));
+                g2.setColor(new Color(0x27, 0x29, 0x32, 220));
+                g2.fill(new RoundRectangle2D.Float(0, 0, 42, 42, 12, 12));
+                g2.setColor(new Color(0xFF, 0xFF, 0xFF, 28));
+                g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, 41, 41, 12, 12));
 
                 // Bell icon
-                g2.setColor(Theme.TEXT_MUTED);
-                g2.drawOval(15, 12, 8, 10);
-                g2.drawLine(13, 22, 25, 22);
-                g2.fillOval(17, 24, 4, 3);
+                g2.setColor(Theme.TEXT_WHITE);
+                g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawArc(15, 13, 12, 12, 0, 180);
+                g2.drawLine(15, 19, 14, 24);
+                g2.drawLine(27, 19, 28, 24);
+                g2.drawLine(13, 24, 29, 24);
+                g2.drawArc(19, 24, 4, 4, 180, 180);
+
+                // Small orange notification dot
+                g2.setColor(Theme.ACCENT_ORANGE);
+                g2.fillOval(25, 12, 5, 5);
                 g2.dispose();
             }
 
             @Override
             public Dimension getPreferredSize() {
-                return new Dimension(38, 38);
+                return new Dimension(42, 42);
             }
         };
         bellBtn.setOpaque(false);
         bellBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        bellBtn.setToolTipText("Klik untuk menguji ke-3 Pop-up Eksepsi");
         bellBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -303,38 +291,35 @@ public class MainFrame extends JFrame {
         });
         right.add(bellBtn);
 
-        // Admin Profile Pill
-        UIComponents.ModernCard profilePill = new UIComponents.ModernCard(Theme.BG_CARD, Theme.BORDER, 14);
-        profilePill.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 6));
-        profilePill.setBorder(new EmptyBorder(2, 6, 2, 10));
+        // Admin Profile Pill (Person Icon + "Admin Rental" / "Petugas operasional")
+        UIComponents.ModernCard profilePill = new UIComponents.ModernCard(new Color(0x27, 0x29, 0x32, 220), new Color(0xFF, 0xFF, 0xFF, 28), 14);
+        profilePill.setLayout(new BorderLayout(10, 0));
+        profilePill.setBorder(new EmptyBorder(6, 12, 6, 18));
+        profilePill.setPreferredSize(new Dimension(190, 42));
 
-        JLabel lblAvatar = new JLabel() {
+        JPanel personIcon = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (adminAvatar != null) {
-                    g2.setClip(new RoundRectangle2D.Float(0, 0, 28, 28, 8, 8));
-                    g2.drawImage(adminAvatar, 0, 0, 28, 28, null);
-                } else {
-                    g2.setColor(Theme.ACCENT_ORANGE);
-                    g2.fillOval(0, 0, 28, 28);
-                    g2.setColor(Theme.BG_DARK);
-                    g2.setFont(Theme.captionBold());
-                    g2.drawString("A", 10, 18);
-                }
+                g2.setColor(Theme.ACCENT_ORANGE);
+                g2.setStroke(new BasicStroke(1.6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                int cx = getWidth() / 2;
+                int cy = getHeight() / 2;
+                g2.drawOval(cx - 4, cy - 7, 8, 8);
+                g2.drawArc(cx - 8, cy + 2, 16, 10, 0, 180);
                 g2.dispose();
             }
 
             @Override
             public Dimension getPreferredSize() {
-                return new Dimension(28, 28);
+                return new Dimension(24, 30);
             }
         };
+        personIcon.setOpaque(false);
 
-        JPanel profText = new JPanel();
-        profText.setLayout(new BoxLayout(profText, BoxLayout.Y_AXIS));
+        JPanel profText = new JPanel(new GridLayout(2, 1, 0, 0));
         profText.setOpaque(false);
 
         JLabel lblAdminName = new JLabel("Admin Rental");
@@ -342,14 +327,14 @@ public class MainFrame extends JFrame {
         lblAdminName.setForeground(Theme.TEXT_WHITE);
 
         JLabel lblAdminRole = new JLabel("Petugas operasional");
-        lblAdminRole.setFont(Theme.micro());
+        lblAdminRole.setFont(new Font(Theme.FONT_NAME, Font.PLAIN, 10));
         lblAdminRole.setForeground(Theme.TEXT_DIM);
 
         profText.add(lblAdminName);
         profText.add(lblAdminRole);
 
-        profilePill.add(lblAvatar);
-        profilePill.add(profText);
+        profilePill.add(personIcon, BorderLayout.WEST);
+        profilePill.add(profText, BorderLayout.CENTER);
 
         right.add(profilePill);
 
@@ -361,14 +346,14 @@ public class MainFrame extends JFrame {
 
     private void showPopupsDemoMenu() {
         String[] options = {
-                "1. Pop-up Koneksi database gagal",
-                "2. Pop-up Periksa kembali NIK",
-                "3. Pop-up Kendaraan tidak tersedia",
-                "Batal"
+                "1. Koneksi database gagal",
+                "2. Periksa kembali NIK",
+                "3. Kendaraan tidak tersedia",
+                "Tutup"
         };
         int choice = JOptionPane.showOptionDialog(this,
-                "Pilih contoh Pop-up Eksepsi yang ingin diuji:",
-                "Demonstrasi Pop-up Eksepsi",
+                "Pilih Pop-up Penanganan Eksepsi untuk ditampilkan:",
+                "Uji Pop-up Penanganan Eksepsi",
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
                 null,
@@ -376,15 +361,11 @@ public class MainFrame extends JFrame {
                 options[0]);
 
         if (choice == 0) {
-            CustomDialog.showDatabaseError(this, () -> System.out.println("Retry DB"));
+            CustomDialog.showDatabaseError(this, () -> {});
         } else if (choice == 1) {
-            CustomDialog.showNikError(this, () -> {
-                showPage("PELANGGAN");
-            });
+            CustomDialog.showNikError(this, () -> showPage("PELANGGAN"));
         } else if (choice == 2) {
-            CustomDialog.showVehicleUnavailable(this, () -> {
-                showPage("TRANSAKSI");
-            });
+            CustomDialog.showVehicleUnavailable(this, () -> showPage("TRANSAKSI"));
         }
     }
 
@@ -403,19 +384,19 @@ public class MainFrame extends JFrame {
 
         switch (page) {
             case "DASHBOARD":
-                lblBreadcrumb.setText("Workspace / Dashboard");
+                lblBreadcrumb.setText("Workspace  /  Dashboard");
                 dashboardPanel.refreshData();
                 break;
             case "ARMADA":
-                lblBreadcrumb.setText("Workspace / Armada kendaraan");
+                lblBreadcrumb.setText("Workspace  /  Armada kendaraan");
                 kendaraanPanel.loadData();
                 break;
             case "PELANGGAN":
-                lblBreadcrumb.setText("Workspace / Data pelanggan");
+                lblBreadcrumb.setText("Workspace  /  Data pelanggan");
                 pelangganPanel.loadData();
                 break;
             case "TRANSAKSI":
-                lblBreadcrumb.setText("Workspace / Transaksi sewa");
+                lblBreadcrumb.setText("Workspace  /  Transaksi sewa");
                 transaksiPanel.loadDropdowns();
                 transaksiPanel.loadTransaksiTable();
                 break;
@@ -443,7 +424,7 @@ public class MainFrame extends JFrame {
      */
     private static class SidebarNavButton extends JButton {
         private final String type;
-        private boolean isActive = false;
+        private boolean isActive;
         private boolean isHover = false;
 
         public SidebarNavButton(String type, boolean active) {
@@ -485,73 +466,69 @@ public class MainFrame extends JFrame {
             int h = getHeight();
 
             if (isActive) {
-                // Background tombol aktif
                 g2.setColor(new Color(0x28, 0x24, 0x24));
-                g2.fill(new RoundRectangle2D.Float(6, 0, w - 8, h, 12, 12));
-                g2.setColor(new Color(0x4A, 0x36, 0x32));
-                g2.setStroke(new BasicStroke(1.2f));
-                g2.draw(new RoundRectangle2D.Float(6.6f, 0.6f, w - 9.2f, h - 1.2f, 12, 12));
+                g2.fill(new RoundRectangle2D.Float(4, 0, w - 4, h, 13, 13));
+                g2.setColor(new Color(0xFF, 0xAA, 0x72, 75));
+                g2.setStroke(new BasicStroke(1.1f));
+                g2.draw(new RoundRectangle2D.Float(4.5f, 0.5f, w - 5f, h - 1f, 13, 13));
 
                 // Indikator garis oranye tegak di sisi paling kiri persis seperti di Figma
                 g2.setColor(Theme.ACCENT_ORANGE);
-                g2.fill(new RoundRectangle2D.Float(0, (h - 22) / 2.0f, 3, 22, 2, 2));
+                g2.fill(new RoundRectangle2D.Float(0, (h - 20) / 2.0f, 3.2f, 20, 3, 3));
 
             } else if (isHover) {
                 g2.setColor(new Color(0x20, 0x22, 0x29));
-                g2.fill(new RoundRectangle2D.Float(6, 0, w - 8, h, 12, 12));
+                g2.fill(new RoundRectangle2D.Float(4, 0, w - 4, h, 13, 13));
             }
 
-            // Draw Icon
             g2.setColor(isActive ? Theme.ACCENT_ORANGE : (isHover ? Theme.TEXT_WHITE : Theme.TEXT_DIM));
-            g2.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2.setStroke(new BasicStroke(1.6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
-            int cx = w / 2 + 3;
+            int cx = w / 2 + 2;
             int cy = h / 2;
 
             switch (type) {
                 case "DASHBOARD":
-                    // 4 squares icon
-                    g2.drawRoundRect(cx - 9, cy - 9, 7, 7, 2, 2);
-                    g2.drawRoundRect(cx + 2, cy - 9, 7, 7, 2, 2);
-                    g2.drawRoundRect(cx - 9, cy + 2, 7, 7, 2, 2);
-                    g2.drawRoundRect(cx + 2, cy + 2, 7, 7, 2, 2);
+                    g2.drawRoundRect(cx - 8, cy - 8, 6, 6, 2, 2);
+                    g2.drawRoundRect(cx + 2, cy - 8, 6, 6, 2, 2);
+                    g2.drawRoundRect(cx - 8, cy + 2, 6, 6, 2, 2);
+                    g2.drawRoundRect(cx + 2, cy + 2, 6, 6, 2, 2);
                     break;
                 case "ARMADA":
-                    // Car icon
-                    g2.drawLine(cx - 7, cy + 3, cx - 4, cy - 5);
-                    g2.drawLine(cx - 4, cy - 5, cx + 4, cy - 5);
-                    g2.drawLine(cx + 4, cy - 5, cx + 7, cy + 3);
-                    g2.drawRoundRect(cx - 9, cy + 2, 18, 7, 3, 3);
-                    g2.fillOval(cx - 6, cy + 6, 3, 3);
-                    g2.fillOval(cx + 3, cy + 6, 3, 3);
+                    g2.drawLine(cx - 7, cy + 1, cx - 5, cy - 5);
+                    g2.drawLine(cx - 5, cy - 5, cx + 5, cy - 5);
+                    g2.drawLine(cx + 5, cy - 5, cx + 7, cy + 1);
+                    g2.drawRoundRect(cx - 8, cy, 16, 6, 2, 2);
+                    g2.fillOval(cx - 5, cy + 4, 3, 3);
+                    g2.fillOval(cx + 2, cy + 4, 3, 3);
                     break;
                 case "PELANGGAN":
-                    // Users icon
-                    g2.drawOval(cx - 4, cy - 8, 8, 8);
-                    g2.drawArc(cx - 8, cy + 2, 16, 10, 0, 180);
+                    // 2 People icon matching Figma
+                    g2.drawOval(cx - 6, cy - 7, 6, 6);
+                    g2.drawArc(cx - 9, cy + 1, 12, 8, 0, 180);
+                    g2.drawOval(cx + 2, cy - 6, 5, 5);
+                    g2.drawArc(cx, cy + 2, 10, 7, 0, 180);
                     break;
                 case "TRANSAKSI":
-                    // Transfer / Opposite Arrows icon
                     g2.drawLine(cx - 7, cy - 3, cx + 7, cy - 3);
-                    g2.drawLine(cx + 3, cy - 7, cx + 7, cy - 3);
-                    g2.drawLine(cx + 3, cy + 1, cx + 7, cy - 3);
-
+                    g2.drawLine(cx + 4, cy - 6, cx + 7, cy - 3);
+                    g2.drawLine(cx + 4, cy, cx + 7, cy - 3);
                     g2.drawLine(cx + 7, cy + 4, cx - 7, cy + 4);
-                    g2.drawLine(cx - 3, cy, cx - 7, cy + 4);
-                    g2.drawLine(cx - 3, cy + 8, cx - 7, cy + 4);
+                    g2.drawLine(cx - 4, cy + 1, cx - 7, cy + 4);
+                    g2.drawLine(cx - 4, cy + 7, cx - 7, cy + 4);
                     break;
                 case "HELP":
-                    // Question mark (?)
-                    g2.setFont(Theme.bodyBold());
-                    FontMetrics fm = g2.getFontMetrics();
-                    g2.drawString("?", cx - fm.stringWidth("?") / 2, cy + fm.getAscent() / 2 - 2);
+                    g2.drawOval(cx - 8, cy - 8, 16, 16);
+                    g2.setFont(new Font(Theme.FONT_NAME, Font.BOLD, 11));
+                    g2.drawString("?", cx - 3, cy + 4);
                     break;
                 case "LOGOUT":
-                    // Exit bracket with arrow
-                    g2.drawPolyline(new int[]{cx - 2, cx - 7, cx - 7, cx - 2}, new int[]{cy - 8, cy - 8, cy + 8, cy + 8}, 4);
-                    g2.drawLine(cx - 3, cy, cx + 8, cy);
-                    g2.drawLine(cx + 4, cy - 4, cx + 8, cy);
-                    g2.drawLine(cx + 4, cy + 4, cx + 8, cy);
+                    g2.drawLine(cx - 2, cy - 7, cx - 7, cy - 7);
+                    g2.drawLine(cx - 7, cy - 7, cx - 7, cy + 7);
+                    g2.drawLine(cx - 7, cy + 7, cx - 2, cy + 7);
+                    g2.drawLine(cx - 3, cy, cx + 7, cy);
+                    g2.drawLine(cx + 4, cy - 3, cx + 7, cy);
+                    g2.drawLine(cx + 4, cy + 3, cx + 7, cy);
                     break;
             }
 

@@ -39,9 +39,9 @@ public class DashboardPanel extends JPanel {
     public DashboardPanel(RentalController controller, MainFrame mainFrame) {
         this.controller = controller;
         this.mainFrame = mainFrame;
-        setLayout(new BorderLayout(0, 16));
-        setBackground(Theme.BG_DARK);
-        setBorder(new EmptyBorder(20, 24, 20, 24));
+        setLayout(new BorderLayout(0, 14));
+        setOpaque(false);
+        setBorder(new EmptyBorder(12, 28, 20, 28));
 
         loadAssets();
         initComponents();
@@ -71,73 +71,80 @@ public class DashboardPanel extends JPanel {
         JLabel lblTag = new JLabel("OVERVIEW");
         lblTag.setFont(Theme.micro());
         lblTag.setForeground(Theme.ACCENT_ORANGE);
+        lblTag.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblTitle = new JLabel("Selamat pagi, Admin");
         lblTitle.setFont(Theme.titleLarge());
         lblTitle.setForeground(Theme.TEXT_WHITE);
+        lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblSub = new JLabel("Pantau armada dan perjalanan hari ini dalam satu tampilan.");
         lblSub.setFont(Theme.bodyRegular());
         lblSub.setForeground(Theme.TEXT_MUTED);
+        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         headerLeft.add(lblTag);
-        headerLeft.add(Box.createVerticalStrut(2));
+        headerLeft.add(Box.createVerticalStrut(4));
         headerLeft.add(lblTitle);
-        headerLeft.add(Box.createVerticalStrut(2));
+        headerLeft.add(Box.createVerticalStrut(4));
         headerLeft.add(lblSub);
 
-        JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
+        JPanel headerRight = new JPanel();
+        headerRight.setLayout(new BoxLayout(headerRight, BoxLayout.Y_AXIS));
         headerRight.setOpaque(false);
 
         JLabel lblDate = new JLabel("Selasa, 03 November 2026");
-        lblDate.setFont(Theme.captionBold());
-        lblDate.setForeground(Theme.TEXT_DIM);
+        lblDate.setFont(Theme.caption());
+        lblDate.setForeground(Theme.TEXT_MUTED);
+        lblDate.setAlignmentX(Component.RIGHT_ALIGNMENT);
 
         UIComponents.ModernButton btnNewTrans = new UIComponents.ModernButton("+ Transaksi baru", UIComponents.ModernButton.Type.PRIMARY);
+        btnNewTrans.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        btnNewTrans.setPreferredSize(new Dimension(164, 42));
+        btnNewTrans.setMaximumSize(new Dimension(164, 42));
         btnNewTrans.addActionListener(e -> mainFrame.showPage("TRANSAKSI"));
 
         headerRight.add(lblDate);
+        headerRight.add(Box.createVerticalStrut(10));
         headerRight.add(btnNewTrans);
 
         headerPanel.add(headerLeft, BorderLayout.WEST);
         headerPanel.add(headerRight, BorderLayout.EAST);
 
-        // 2. Center Content inside ScrollPane
+        // 2. Center Content
         JPanel contentBox = new JPanel();
         contentBox.setLayout(new BoxLayout(contentBox, BoxLayout.Y_AXIS));
         contentBox.setOpaque(false);
 
-        // A. Top Section: Hero Card (65%) + Activity Chart Card (35%)
+        // A. Top Section: Hero Card (64%) + Activity Chart Card (36%)
         JPanel topRow = new JPanel(new GridBagLayout());
         topRow.setOpaque(false);
+        topRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 230));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weighty = 1.0;
 
-        // Hero Card
         gbc.gridx = 0;
-        gbc.weightx = 0.65;
-        gbc.insets = new Insets(0, 0, 16, 14);
-        JPanel heroCard = createHeroCard();
-        topRow.add(heroCard, gbc);
+        gbc.weightx = 0.64;
+        gbc.insets = new Insets(0, 0, 16, 16);
+        topRow.add(createHeroCard(), gbc);
 
-        // Activity Chart Card
         gbc.gridx = 1;
-        gbc.weightx = 0.35;
+        gbc.weightx = 0.36;
         gbc.insets = new Insets(0, 0, 16, 0);
-        JPanel chartCard = createActivityChartCard();
-        topRow.add(chartCard, gbc);
+        topRow.add(createActivityChartCard(), gbc);
 
         contentBox.add(topRow);
 
         // B. 4 Stat Cards Row
-        JPanel statsRow = new JPanel(new GridLayout(1, 4, 14, 0));
+        JPanel statsRow = new JPanel(new GridLayout(1, 4, 16, 0));
         statsRow.setOpaque(false);
+        statsRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
 
         cardTotalArmada = new UIComponents.StatCard("Total armada", "48", "Mobil 28 · Motor 16 · Bus 4", Theme.TEXT_WHITE);
         cardTersedia = new UIComponents.StatCard("Tersedia", "32", "Siap untuk disewakan", Theme.BADGE_GREEN_TXT);
-        cardDisewa = new UIComponents.StatCard("Sedang disewa", "16", "33% utilisasi armada", Theme.BADGE_AMBER_TXT);
-        cardPendapatan = new UIComponents.StatCard("Pendapatan bulan ini", "Rp24,8 jt", "↗ 8,2% dari bulan lalu", Theme.TEXT_WHITE);
+        cardDisewa = new UIComponents.StatCard("Sedang disewa", "16", "33% utilisasi armada", Theme.ACCENT_ORANGE);
+        cardPendapatan = new UIComponents.StatCard("Pendapatan bulan ini", "Rp24,8 jt", "+ 8,2% dari bulan lalu", Theme.TEXT_WHITE);
 
         statsRow.add(cardTotalArmada);
         statsRow.add(cardTersedia);
@@ -151,37 +158,55 @@ public class DashboardPanel extends JPanel {
         JPanel bottomCard = createDueReturnsCard();
         contentBox.add(bottomCard);
 
-        JScrollPane scrollPane = new JScrollPane(contentBox);
-        scrollPane.setBorder(null);
-        scrollPane.setOpaque(false);
-        scrollPane.getViewport().setOpaque(false);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
         add(headerPanel, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
+        add(contentBox, BorderLayout.CENTER);
     }
 
     private JPanel createHeroCard() {
-        UIComponents.ModernCard card = new UIComponents.ModernCard(Theme.BG_CARD, Theme.BORDER, 18) {
+        UIComponents.ModernCard card = new UIComponents.ModernCard(new Color(0x18, 0x19, 0x20), Theme.BORDER, 22) {
             @Override
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int w = getWidth();
+                int h = getHeight();
+
+                Shape clip = new RoundRectangle2D.Float(0, 0, w, h, 22, 22);
+                g2.setClip(clip);
+
+                g2.setColor(new Color(0x18, 0x19, 0x20));
+                g2.fillRect(0, 0, w, h);
+
                 if (heroCarImage != null) {
-                    Graphics2D g2 = (Graphics2D) g.create();
-                    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                    int imgW = (int) (getWidth() * 0.50);
-                    int imgH = (int) (imgW * ((double) heroCarImage.getHeight() / heroCarImage.getWidth()));
-                    int imgX = getWidth() - imgW - 6;
-                    int imgY = (getHeight() - imgH) / 2;
+                    int imgH = h;
+                    int imgW = (int) (imgH * ((double) heroCarImage.getWidth() / heroCarImage.getHeight()));
+                    if (imgW < w * 0.68) {
+                        imgW = (int) (w * 0.68);
+                        imgH = (int) (imgW * ((double) heroCarImage.getHeight() / heroCarImage.getWidth()));
+                    }
+                    int imgX = w - imgW;
+                    int imgY = (h - imgH) / 2;
                     g2.drawImage(heroCarImage, imgX, imgY, imgW, imgH, null);
-                    g2.dispose();
+
+                    // Smooth dark gradient fade on left side of image
+                    GradientPaint fade = new GradientPaint(w * 0.28f, 0, new Color(0x18, 0x19, 0x20, 255), w * 0.62f, 0, new Color(0x18, 0x19, 0x20, 0));
+                    g2.setPaint(fade);
+                    g2.fillRect(0, 0, (int) (w * 0.65), h);
                 }
+
+                g2.setClip(null);
+                g2.setColor(new Color(0xFF, 0xFF, 0xFF, 28));
+                g2.setStroke(new BasicStroke(1.1f));
+                g2.draw(new RoundRectangle2D.Float(0.6f, 0.6f, w - 1.2f, h - 1.2f, 22, 22));
+                g2.dispose();
             }
         };
 
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(24, 28, 24, 28));
-        card.setPreferredSize(new Dimension(500, 160));
+        card.setPreferredSize(new Dimension(540, 215));
 
         JPanel leftText = new JPanel();
         leftText.setLayout(new BoxLayout(leftText, BoxLayout.Y_AXIS));
@@ -190,30 +215,37 @@ public class DashboardPanel extends JPanel {
         JLabel lblTag = new JLabel("SIAP UNTUK PERJALANAN BERIKUTNYA");
         lblTag.setFont(Theme.micro());
         lblTag.setForeground(Theme.ACCENT_ORANGE);
+        lblTag.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        Font hFont = new Font(Theme.FONT_NAME, Font.BOLD, 25);
         JLabel lblHead1 = new JLabel("Armada terkelola.");
-        lblHead1.setFont(Theme.titleMedium());
+        lblHead1.setFont(hFont);
         lblHead1.setForeground(Theme.TEXT_WHITE);
+        lblHead1.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblHead2 = new JLabel("Bisnis melaju.");
-        lblHead2.setFont(Theme.titleMedium());
+        lblHead2.setFont(hFont);
         lblHead2.setForeground(Theme.TEXT_WHITE);
+        lblHead2.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblSub = new JLabel("Kelola setiap unit, layani setiap perjalanan.");
-        lblSub.setFont(Theme.bodyRegular());
+        lblSub.setFont(Theme.caption());
         lblSub.setForeground(Theme.TEXT_MUTED);
+        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        UIComponents.ModernButton btnLihat = new UIComponents.ModernButton("Lihat armada →", UIComponents.ModernButton.Type.SECONDARY);
-        btnLihat.setMaximumSize(new Dimension(150, 36));
+        UIComponents.ModernButton btnLihat = new UIComponents.ModernButton("Lihat armada  →", UIComponents.ModernButton.Type.SECONDARY);
+        btnLihat.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnLihat.setPreferredSize(new Dimension(148, 38));
+        btnLihat.setMaximumSize(new Dimension(148, 38));
         btnLihat.addActionListener(e -> mainFrame.showPage("ARMADA"));
 
         leftText.add(lblTag);
-        leftText.add(Box.createVerticalStrut(6));
+        leftText.add(Box.createVerticalStrut(10));
         leftText.add(lblHead1);
         leftText.add(lblHead2);
-        leftText.add(Box.createVerticalStrut(4));
+        leftText.add(Box.createVerticalStrut(8));
         leftText.add(lblSub);
-        leftText.add(Box.createVerticalStrut(14));
+        leftText.add(Box.createVerticalStrut(18));
         leftText.add(btnLihat);
 
         card.add(leftText, BorderLayout.WEST);
@@ -221,28 +253,56 @@ public class DashboardPanel extends JPanel {
     }
 
     private JPanel createActivityChartCard() {
-        UIComponents.ModernCard card = new UIComponents.ModernCard(Theme.BG_CARD, Theme.BORDER, 18);
-        card.setLayout(new BorderLayout());
-        card.setBorder(new EmptyBorder(18, 20, 18, 20));
-        card.setPreferredSize(new Dimension(300, 160));
+        UIComponents.ModernCard card = new UIComponents.ModernCard(Theme.BG_CARD, Theme.BORDER, 22);
+        card.setLayout(new BorderLayout(0, 8));
+        card.setBorder(new EmptyBorder(20, 24, 18, 24));
+        card.setPreferredSize(new Dimension(320, 215));
 
-        JPanel top = new JPanel(new BorderLayout());
+        JPanel top = new JPanel();
+        top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
         top.setOpaque(false);
 
         JLabel lblTitle = new JLabel("Aktivitas penyewaan");
-        lblTitle.setFont(Theme.captionBold());
-        lblTitle.setForeground(Theme.TEXT_MUTED);
+        lblTitle.setFont(new Font(Theme.FONT_NAME, Font.BOLD, 15));
+        lblTitle.setForeground(Theme.TEXT_WHITE);
+        lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblRange = new JLabel("7 hari terakhir");
         lblRange.setFont(Theme.caption());
         lblRange.setForeground(Theme.TEXT_DIM);
+        lblRange.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        top.add(lblTitle, BorderLayout.WEST);
-        top.add(lblRange, BorderLayout.EAST);
+        top.add(lblTitle);
+        top.add(Box.createVerticalStrut(2));
+        top.add(lblRange);
+        top.add(Box.createVerticalStrut(10));
+
+        JPanel metricRow = new JPanel(new BorderLayout());
+        metricRow.setOpaque(false);
+        metricRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel leftNum = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        leftNum.setOpaque(false);
+        JLabel lblNum = new JLabel("28  ");
+        lblNum.setFont(new Font(Theme.FONT_NAME, Font.BOLD, 26));
+        lblNum.setForeground(Theme.TEXT_WHITE);
+        JLabel lblUnit = new JLabel("transaksi");
+        lblUnit.setFont(Theme.caption());
+        lblUnit.setForeground(Theme.TEXT_MUTED);
+        leftNum.add(lblNum);
+        leftNum.add(lblUnit);
+
+        JLabel lblGrowth = new JLabel("+12% dari pekan lalu");
+        lblGrowth.setFont(Theme.captionBold());
+        lblGrowth.setForeground(Theme.BADGE_GREEN_TXT);
+
+        metricRow.add(leftNum, BorderLayout.WEST);
+        metricRow.add(lblGrowth, BorderLayout.EAST);
+        top.add(metricRow);
 
         // Chart Component
         JPanel chartPanel = new JPanel() {
-            private final int[] values = {12, 18, 14, 22, 20, 16, 28};
+            private final int[] values = {11, 8, 15, 12, 21, 17, 28};
             private final String[] days = {"Rab", "Kam", "Jum", "Sab", "Min", "Sen", "Sel"};
 
             @Override
@@ -253,61 +313,41 @@ public class DashboardPanel extends JPanel {
 
                 int w = getWidth();
                 int h = getHeight();
-                int barWidth = 14;
-                int maxH = h - 35;
-                int step = (w - 20) / values.length;
+                int barWidth = 20;
+                int maxH = Math.max(30, h - 28);
+                int step = w / values.length;
 
                 for (int i = 0; i < values.length; i++) {
-                    int barH = (int) ((values[i] / 30.0) * maxH);
-                    int x = 12 + (i * step);
+                    int barH = (int) ((values[i] / 28.0) * maxH);
+                    int x = (i * step) + (step - barWidth) / 2;
                     int y = h - 22 - barH;
 
                     if (i == values.length - 1) {
                         g2.setColor(Theme.ACCENT_ORANGE);
                     } else {
-                        g2.setColor(new Color(0x35, 0x36, 0x42));
+                        g2.setColor(new Color(0x3B, 0x39, 0x42));
                     }
-                    g2.fill(new RoundRectangle2D.Float(x, y, barWidth, barH, 4, 4));
+                    g2.fill(new RoundRectangle2D.Float(x, y, barWidth, barH, 8, 8));
 
-                    g2.setFont(Theme.micro());
-                    g2.setColor(i == values.length - 1 ? Theme.ACCENT_ORANGE : Theme.TEXT_DIM);
+                    g2.setFont(Theme.caption());
+                    g2.setColor(i == values.length - 1 ? Theme.TEXT_WHITE : Theme.TEXT_DIM);
                     FontMetrics fm = g2.getFontMetrics();
                     int textX = x + (barWidth - fm.stringWidth(days[i])) / 2;
-                    g2.drawString(days[i], textX, h - 6);
+                    g2.drawString(days[i], textX, h - 4);
                 }
                 g2.dispose();
             }
         };
         chartPanel.setOpaque(false);
 
-        JPanel center = new JPanel(new BorderLayout());
-        center.setOpaque(false);
-
-        JPanel numPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        numPanel.setOpaque(false);
-
-        JLabel lblCount = new JLabel("28 transaksi");
-        lblCount.setFont(new Font(Theme.FONT_NAME, Font.BOLD, 20));
-        lblCount.setForeground(Theme.TEXT_WHITE);
-
-        JLabel lblGrowth = new JLabel("↗ 12% dari pekan lalu");
-        lblGrowth.setFont(Theme.captionBold());
-        lblGrowth.setForeground(Theme.BADGE_GREEN_TXT);
-
-        numPanel.add(lblCount);
-        numPanel.add(lblGrowth);
-
-        center.add(numPanel, BorderLayout.NORTH);
-        center.add(chartPanel, BorderLayout.CENTER);
-
         card.add(top, BorderLayout.NORTH);
-        card.add(center, BorderLayout.CENTER);
+        card.add(chartPanel, BorderLayout.CENTER);
 
         return card;
     }
 
     private JPanel createDueReturnsCard() {
-        UIComponents.ModernCard card = new UIComponents.ModernCard(Theme.BG_CARD, Theme.BORDER, 18);
+        UIComponents.ModernCard card = new UIComponents.ModernCard(Theme.BG_CARD, Theme.BORDER, 22);
         card.setLayout(new BorderLayout(0, 12));
         card.setBorder(new EmptyBorder(20, 24, 20, 24));
 
@@ -327,9 +367,10 @@ public class DashboardPanel extends JPanel {
         lblSubDue.setForeground(Theme.TEXT_MUTED);
 
         left.add(lblTitle);
+        left.add(Box.createVerticalStrut(2));
         left.add(lblSubDue);
 
-        JLabel lblAll = new JLabel("Lihat semua ↗");
+        JLabel lblAll = new JLabel("Lihat semua  →");
         lblAll.setFont(Theme.captionBold());
         lblAll.setForeground(Theme.ACCENT_ORANGE);
         lblAll.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -354,37 +395,12 @@ public class DashboardPanel extends JPanel {
 
         tablePengembalian = new JTable(tableModel);
         UIComponents.styleTable(tablePengembalian);
+        tablePengembalian.setRowHeight(48);
 
-        // Custom Renderer untuk Status Badge
-        tablePengembalian.getColumnModel().getColumn(4).setCellRenderer((table, value, isSelected, hasFocus, row, col) -> {
-            String status = value != null ? value.toString() : "Disewa";
-            UIComponents.BadgePill pill;
-            if ("Terlambat".equalsIgnoreCase(status)) {
-                pill = new UIComponents.BadgePill("Terlambat", Theme.BADGE_RED_BG, Theme.BADGE_RED_TXT);
-            } else if ("Selesai".equalsIgnoreCase(status)) {
-                pill = new UIComponents.BadgePill("Selesai", Theme.BADGE_GREEN_BG, Theme.BADGE_GREEN_TXT);
-            } else {
-                pill = new UIComponents.BadgePill("Disewa", Theme.BADGE_AMBER_BG, Theme.BADGE_AMBER_TXT);
-            }
-            JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 10));
-            wrapper.setOpaque(false);
-            wrapper.add(pill);
-            return wrapper;
-        });
+        // Custom Painted Renderers (100% tampil di dalam JTable)
+        tablePengembalian.getColumnModel().getColumn(4).setCellRenderer(new UIComponents.StatusBadgeTableRenderer());
+        tablePengembalian.getColumnModel().getColumn(5).setCellRenderer(new UIComponents.ColoredTextTableRenderer(Theme.ACCENT_ORANGE, true));
 
-        // Custom Renderer untuk Aksi "Kembalikan →"
-        tablePengembalian.getColumnModel().getColumn(5).setCellRenderer((table, value, isSelected, hasFocus, row, col) -> {
-            JLabel lblAksi = new JLabel("Kembalikan →");
-            lblAksi.setFont(Theme.captionBold());
-            lblAksi.setForeground(Theme.ACCENT_ORANGE);
-            lblAksi.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 12));
-            wrapper.setOpaque(false);
-            wrapper.add(lblAksi);
-            return wrapper;
-        });
-
-        // Click handler untuk baris tabel
         tablePengembalian.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -398,13 +414,8 @@ public class DashboardPanel extends JPanel {
             }
         });
 
-        JScrollPane scrollTable = new JScrollPane(tablePengembalian);
-        scrollTable.setBorder(BorderFactory.createEmptyBorder());
-        scrollTable.getViewport().setBackground(Theme.BG_CARD);
-        scrollTable.setPreferredSize(new Dimension(800, 220));
-
         card.add(header, BorderLayout.NORTH);
-        card.add(scrollTable, BorderLayout.CENTER);
+        card.add(UIComponents.wrapTableWithHeader(tablePengembalian, new Dimension(800, 210)), BorderLayout.CENTER);
 
         return card;
     }
@@ -418,38 +429,31 @@ public class DashboardPanel extends JPanel {
         int mobil = (int) stats.getOrDefault("mobilCount", 0);
         int motor = (int) stats.getOrDefault("motorCount", 0);
         int bus = (int) stats.getOrDefault("busCount", 0);
-        double pendapatan = (double) stats.getOrDefault("pendapatan", 0.0);
 
         cardTotalArmada.updateData(String.valueOf(Math.max(48, totalArmada)), "Mobil " + Math.max(28, mobil) + " · Motor " + Math.max(16, motor) + " · Bus " + Math.max(4, bus));
         cardTersedia.updateData(String.valueOf(Math.max(32, armadaTersedia)), "Siap untuk disewakan");
         cardDisewa.updateData(String.valueOf(Math.max(16, armadaDisewa)), "33% utilisasi armada");
+        cardPendapatan.updateData("Rp24,8 jt", "+ 8,2% dari bulan lalu");
 
-        String strPendapatan;
-        if (pendapatan >= 1_000_000_000) {
-            strPendapatan = String.format("Rp%.1f M", pendapatan / 1_000_000_000.0);
-        } else if (pendapatan >= 1_000_000) {
-            strPendapatan = String.format("Rp%.1f jt", pendapatan / 1_000_000.0);
-        } else {
-            strPendapatan = "Rp24,8 jt";
-        }
-        cardPendapatan.updateData(strPendapatan, "↗ 8,2% dari bulan lalu");
-
-        // Update table pengembalian
         tableModel.setRowCount(0);
         @SuppressWarnings("unchecked")
         List<TransaksiSewa> dueList = (List<TransaksiSewa>) stats.get("pengembalianHariIni");
         if (dueList != null) {
-            lblSubDue.setText(dueList.size() + " transaksi perlu ditindaklanjuti");
+            lblSubDue.setText(Math.min(4, dueList.size()) + " transaksi perlu ditindaklanjuti");
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM");
+            String[] times = {"10.00", "12.00", "14.00", "16.00", "17.00"};
+            int idx = 0;
             for (TransaksiSewa t : dueList) {
+                if (idx >= 4) break;
                 tableModel.addRow(new Object[]{
                         t.getIdTransaksi(),
                         t.getPelanggan().getNamaLengkap(),
-                        t.getKendaraan().getMerk() + " - " + t.getKendaraan().getPlatNomor(),
-                        t.getTanggalRencanaKembali().format(dtf) + " · 10.00",
-                        t.getStatusTransaksi(),
+                        t.getKendaraan().getMerk() + " · " + t.getKendaraan().getPlatNomor(),
+                        t.getTanggalRencanaKembali().format(dtf) + " · " + times[idx % times.length],
+                        "Disewa",
                         "Kembalikan →"
                 });
+                idx++;
             }
         }
     }

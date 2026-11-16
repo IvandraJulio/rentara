@@ -6,6 +6,7 @@ package model;
  * serta denda keterlambatan Rp100.000/hari.
  */
 public class Mobil extends Kendaraan {
+    public static final double TARIF_SUPIR_HARIAN = 150_000.0;
     private int jumlahKursi;
     private String jenisTransmisi; // "Otomatis (AT)" atau "Manual (MT)"
     private boolean termasukSupir;

@@ -206,4 +206,9 @@ public class TransaksiSewa {
     public void setStatusTransaksi(String statusTransaksi) {
         this.statusTransaksi = statusTransaksi;
     }
+
+    @Override
+    public String toString() {
+        return idTransaksi + "  ·  " + (kendaraan != null ? kendaraan.getMerk() : "-");
+    }
 }

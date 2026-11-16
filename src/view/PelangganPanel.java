@@ -54,9 +54,9 @@ public class PelangganPanel extends JPanel {
     public PelangganPanel(RentalController controller, MainFrame mainFrame) {
         this.controller = controller;
         this.mainFrame = mainFrame;
-        setLayout(new BorderLayout(0, 16));
-        setBackground(Theme.BG_DARK);
-        setBorder(new EmptyBorder(24, 28, 24, 28));
+        setLayout(new BorderLayout(0, 14));
+        setOpaque(false);
+        setBorder(new EmptyBorder(12, 28, 20, 28));
 
         initComponents();
         loadData();
@@ -74,47 +74,85 @@ public class PelangganPanel extends JPanel {
         JLabel lblTag = new JLabel("CUSTOMER MANAGEMENT");
         lblTag.setFont(Theme.micro());
         lblTag.setForeground(Theme.ACCENT_ORANGE);
+        lblTag.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblTitle = new JLabel("Data pelanggan");
         lblTitle.setFont(Theme.titleLarge());
         lblTitle.setForeground(Theme.TEXT_WHITE);
+        lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblSub = new JLabel("Data penyewa yang rapi, pelayanan yang lebih personal.");
         lblSub.setFont(Theme.bodyRegular());
         lblSub.setForeground(Theme.TEXT_MUTED);
+        lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         headerLeft.add(lblTag);
-        headerLeft.add(Box.createVerticalStrut(2));
+        headerLeft.add(Box.createVerticalStrut(4));
         headerLeft.add(lblTitle);
-        headerLeft.add(Box.createVerticalStrut(2));
+        headerLeft.add(Box.createVerticalStrut(4));
         headerLeft.add(lblSub);
 
+        JPanel btnRightWrap = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 14));
+        btnRightWrap.setOpaque(false);
         UIComponents.ModernButton btnTambah = new UIComponents.ModernButton("+ Tambah pelanggan", UIComponents.ModernButton.Type.PRIMARY);
+        btnTambah.setPreferredSize(new Dimension(176, 42));
         btnTambah.addActionListener(e -> resetFormToAddNew());
+        btnRightWrap.add(btnTambah);
 
         headerPanel.add(headerLeft, BorderLayout.WEST);
-        headerPanel.add(btnTambah, BorderLayout.EAST);
+        headerPanel.add(btnRightWrap, BorderLayout.EAST);
 
         // 2. 3 Stat Cards Row
         JPanel statsRow = new JPanel(new GridLayout(1, 3, 16, 0));
         statsRow.setOpaque(false);
-        statsRow.setBorder(new EmptyBorder(10, 0, 10, 0));
+        statsRow.setBorder(new EmptyBorder(12, 0, 4, 0));
+        statsRow.setPreferredSize(new Dimension(0, 114));
 
-        cardTotal = new UIComponents.StatCard("Total pelanggan", "128", "Tercatat dalam sistem", Theme.TEXT_WHITE);
-        cardAktif = new UIComponents.StatCard("Aktif menyewa", "16", "Sedang dalam masa sewa", Theme.BADGE_AMBER_TXT);
-        cardBaru = new UIComponents.StatCard("Pelanggan baru bulan ini", "12", "Peningkatan 15% dari bulan lalu", Theme.TEXT_WHITE);
+        cardTotal = new UIComponents.StatCard("Total pelanggan", "128", "", Theme.TEXT_WHITE);
+        cardAktif = new UIComponents.StatCard("Aktif menyewa", "16", "", Theme.ACCENT_ORANGE);
+        cardBaru = new UIComponents.StatCard("Pelanggan baru bulan ini", "12", "", Theme.TEXT_WHITE);
 
         statsRow.add(cardTotal);
         statsRow.add(cardAktif);
         statsRow.add(cardBaru);
 
-        // 3. Search and Filter Row
+        // 3. Split Body: Table (Left 65%) + Form Card (Right 35%)
+        JPanel bodyPanel = new JPanel(new GridBagLayout());
+        bodyPanel.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
+
+        gbc.gridx = 0;
+        gbc.weightx = 0.65;
+        gbc.insets = new Insets(0, 0, 0, 16);
+        bodyPanel.add(createTableContainer(), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.35;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        bodyPanel.add(createFormCard(), gbc);
+
+        JPanel northContainer = new JPanel(new BorderLayout());
+        northContainer.setOpaque(false);
+        northContainer.add(headerPanel, BorderLayout.NORTH);
+        northContainer.add(statsRow, BorderLayout.SOUTH);
+
+        add(northContainer, BorderLayout.NORTH);
+        add(bodyPanel, BorderLayout.CENTER);
+    }
+
+    private JPanel createTableContainer() {
+        UIComponents.ModernCard card = new UIComponents.ModernCard(Theme.BG_CARD, Theme.BORDER, 22);
+        card.setLayout(new BorderLayout(0, 12));
+        card.setBorder(new EmptyBorder(18, 20, 16, 20));
+
+        // Search and Filter Row inside top of Table Card
         JPanel searchRow = new JPanel(new BorderLayout(12, 0));
         searchRow.setOpaque(false);
-        searchRow.setBorder(new EmptyBorder(0, 0, 12, 0));
 
         txtSearch = new UIComponents.ModernTextField("Cari nama atau NIK pelanggan...");
-        txtSearch.setPreferredSize(new Dimension(380, 38));
+        txtSearch.setPreferredSize(new Dimension(380, 40));
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { filterData(); }
             public void removeUpdate(DocumentEvent e) { filterData(); }
@@ -122,52 +160,12 @@ public class PelangganPanel extends JPanel {
         });
 
         cmbFilterSim = new JComboBox<>(new String[]{"Semua pelanggan", "Punya SIM A", "Tanpa SIM A"});
-        cmbFilterSim.setFont(Theme.bodyRegular());
-        cmbFilterSim.setBackground(Theme.BG_INPUT);
-        cmbFilterSim.setForeground(Theme.TEXT_WHITE);
-        cmbFilterSim.setPreferredSize(new Dimension(160, 38));
+        UIComponents.styleComboBox(cmbFilterSim);
+        cmbFilterSim.setPreferredSize(new Dimension(210, 40));
         cmbFilterSim.addActionListener(e -> filterData());
 
-        searchRow.add(txtSearch, BorderLayout.WEST);
+        searchRow.add(txtSearch, BorderLayout.CENTER);
         searchRow.add(cmbFilterSim, BorderLayout.EAST);
-
-        // 4. Split Body: Table (Left 62%) + Form Card (Right 38%)
-        JPanel bodyPanel = new JPanel(new GridBagLayout());
-        bodyPanel.setOpaque(false);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weighty = 1.0;
-
-        // Table Panel (Left)
-        gbc.gridx = 0;
-        gbc.weightx = 0.62;
-        gbc.insets = new Insets(0, 0, 0, 14);
-        JPanel tableContainer = createTableContainer();
-        bodyPanel.add(tableContainer, gbc);
-
-        // Form Card (Right)
-        gbc.gridx = 1;
-        gbc.weightx = 0.38;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        JPanel formCard = createFormCard();
-        bodyPanel.add(formCard, gbc);
-
-        // Combine North Controls
-        JPanel northContainer = new JPanel();
-        northContainer.setLayout(new BoxLayout(northContainer, BoxLayout.Y_AXIS));
-        northContainer.setOpaque(false);
-        northContainer.add(headerPanel);
-        northContainer.add(statsRow);
-        northContainer.add(searchRow);
-
-        add(northContainer, BorderLayout.NORTH);
-        add(bodyPanel, BorderLayout.CENTER);
-    }
-
-    private JPanel createTableContainer() {
-        UIComponents.ModernCard card = new UIComponents.ModernCard(Theme.BG_CARD, Theme.BORDER, 18);
-        card.setLayout(new BorderLayout(0, 10));
-        card.setBorder(new EmptyBorder(16, 18, 16, 18));
 
         String[] cols = {"Pelanggan", "NIK KTP", "Kontak", "SIM A", "Aksi"};
         tableModel = new DefaultTableModel(cols, 0) {
@@ -179,83 +177,32 @@ public class PelangganPanel extends JPanel {
 
         tablePelanggan = new JTable(tableModel);
         UIComponents.styleTable(tablePelanggan);
+        tablePelanggan.setRowHeight(60);
 
-        // Renderer Pelanggan (Nama + ID dua baris)
-        tablePelanggan.getColumnModel().getColumn(0).setCellRenderer((table, value, isSelected, hasFocus, row, col) -> {
-            if (currentPelangganList != null && row < currentPelangganList.size()) {
-                Pelanggan p = currentPelangganList.get(row);
-                JPanel panel = new JPanel();
-                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-                panel.setOpaque(false);
-                panel.setBorder(new EmptyBorder(6, 4, 6, 4));
+        tablePelanggan.getColumnModel().getColumn(0).setPreferredWidth(185);
+        tablePelanggan.getColumnModel().getColumn(1).setPreferredWidth(160);
+        tablePelanggan.getColumnModel().getColumn(2).setPreferredWidth(135);
+        tablePelanggan.getColumnModel().getColumn(3).setPreferredWidth(70);
+        tablePelanggan.getColumnModel().getColumn(4).setPreferredWidth(75);
 
-                JLabel lblName = new JLabel(p.getNamaLengkap());
-                lblName.setFont(Theme.bodyBold());
-                lblName.setForeground(Theme.TEXT_WHITE);
+        // Custom Painted Renderers (100% bebas masalah hilang di JTable)
+        tablePelanggan.getColumnModel().getColumn(0).setCellRenderer(new UIComponents.TwoLineTableRenderer(false));
+        tablePelanggan.getColumnModel().getColumn(1).setCellRenderer(new UIComponents.ColoredTextTableRenderer(Theme.TEXT_MUTED, false));
+        tablePelanggan.getColumnModel().getColumn(2).setCellRenderer(new UIComponents.ColoredTextTableRenderer(Theme.TEXT_WHITE, false));
+        tablePelanggan.getColumnModel().getColumn(3).setCellRenderer(new UIComponents.ColoredTextTableRenderer(null, true));
+        tablePelanggan.getColumnModel().getColumn(4).setCellRenderer(new UIComponents.StackedActionTableRenderer());
 
-                JLabel lblId = new JLabel(p.getIdPelanggan());
-                lblId.setFont(Theme.caption());
-                lblId.setForeground(Theme.TEXT_MUTED);
-
-                panel.add(lblName);
-                panel.add(lblId);
-                return panel;
-            }
-            return new JLabel(value != null ? value.toString() : "");
-        });
-
-        // Renderer NIK KTP (Masked)
-        tablePelanggan.getColumnModel().getColumn(1).setCellRenderer((table, value, isSelected, hasFocus, row, col) -> {
-            JLabel l = new JLabel(value != null ? value.toString() : "");
-            l.setFont(Theme.bodyRegular());
-            l.setForeground(Theme.TEXT_MUTED);
-            l.setBorder(new EmptyBorder(0, 8, 0, 0));
-            return l;
-        });
-
-        // Renderer SIM A (Ada hijau / Tidak abu-abu)
-        tablePelanggan.getColumnModel().getColumn(3).setCellRenderer((table, value, isSelected, hasFocus, row, col) -> {
-            boolean sim = "Ada".equalsIgnoreCase(String.valueOf(value));
-            JLabel badge = new JLabel(sim ? "Ada" : "Tidak");
-            badge.setFont(Theme.captionBold());
-            badge.setForeground(sim ? Theme.BADGE_GREEN_TXT : Theme.TEXT_DIM);
-            JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 12));
-            wrapper.setOpaque(false);
-            wrapper.add(badge);
-            return wrapper;
-        });
-
-        // Renderer Aksi: Ubah & Hapus
-        tablePelanggan.getColumnModel().getColumn(4).setCellRenderer((table, value, isSelected, hasFocus, row, col) -> {
-            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 12));
-            p.setOpaque(false);
-
-            JLabel lblUbah = new JLabel("Ubah");
-            lblUbah.setFont(Theme.captionBold());
-            lblUbah.setForeground(Theme.ACCENT_ORANGE);
-            lblUbah.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-            JLabel lblHapus = new JLabel("Hapus");
-            lblHapus.setFont(Theme.captionBold());
-            lblHapus.setForeground(Theme.BADGE_RED_TXT);
-            lblHapus.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-            p.add(lblUbah);
-            p.add(lblHapus);
-            return p;
-        });
-
-        // Click handler aksi
         tablePelanggan.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = tablePelanggan.rowAtPoint(e.getPoint());
                 int col = tablePelanggan.columnAtPoint(e.getPoint());
-                if (row >= 0 && row < currentPelangganList.size()) {
+                if (row >= 0 && currentPelangganList != null && row < currentPelangganList.size()) {
                     Pelanggan p = currentPelangganList.get(row);
                     if (col == 4) {
-                        int xInCol = e.getX() - tablePelanggan.getCellRect(row, col, false).x;
-                        if (xInCol < 45) {
+                        Rectangle cellRect = tablePelanggan.getCellRect(row, col, false);
+                        int yInCell = e.getY() - cellRect.y;
+                        if (yInCell <= cellRect.height / 2) {
                             populateFormForEdit(p);
                         } else {
                             confirmHapusPelanggan(p);
@@ -263,38 +210,37 @@ public class PelangganPanel extends JPanel {
                     } else {
                         populateFormForEdit(p);
                     }
+                    tablePelanggan.setRowSelectionInterval(row, row);
                 }
             }
         });
 
-        JScrollPane scroll = new JScrollPane(tablePelanggan);
-        scroll.setBorder(null);
-        scroll.getViewport().setBackground(Theme.BG_CARD);
-
         // Footer Pagination
         JPanel footer = new JPanel(new BorderLayout());
         footer.setOpaque(false);
-        lblPagination = new JLabel("Menampilkan 1-6 dari 128 pelanggan");
+        footer.setBorder(new EmptyBorder(6, 4, 0, 4));
+        lblPagination = new JLabel("Menampilkan 1–6 dari 128 pelanggan");
         lblPagination.setFont(Theme.caption());
-        lblPagination.setForeground(Theme.TEXT_MUTED);
+        lblPagination.setForeground(Theme.TEXT_DIM);
 
-        JLabel lblPager = new JLabel("‹ 1 2 3 ... 22 ›");
+        JLabel lblPager = new JLabel("‹   1   2   3   ...   22   ›");
         lblPager.setFont(Theme.captionBold());
-        lblPager.setForeground(Theme.TEXT_DIM);
+        lblPager.setForeground(Theme.TEXT_MUTED);
 
         footer.add(lblPagination, BorderLayout.WEST);
         footer.add(lblPager, BorderLayout.EAST);
 
-        card.add(scroll, BorderLayout.CENTER);
+        card.add(searchRow, BorderLayout.NORTH);
+        card.add(UIComponents.wrapTableWithHeader(tablePelanggan, null), BorderLayout.CENTER);
         card.add(footer, BorderLayout.SOUTH);
 
         return card;
     }
 
     private JPanel createFormCard() {
-        UIComponents.ModernCard card = new UIComponents.ModernCard(Theme.BG_CARD, Theme.BORDER, 18);
+        UIComponents.ModernCard card = new UIComponents.ModernCard(Theme.BG_CARD, Theme.BORDER, 22);
         card.setLayout(new BorderLayout());
-        card.setBorder(new EmptyBorder(20, 22, 20, 22));
+        card.setBorder(new EmptyBorder(22, 24, 22, 24));
 
         // Form Header
         JPanel formHeader = new JPanel();
@@ -302,42 +248,51 @@ public class PelangganPanel extends JPanel {
         formHeader.setOpaque(false);
 
         lblFormTitle = new JLabel("Tambah pelanggan");
-        lblFormTitle.setFont(Theme.titleSmall());
+        lblFormTitle.setFont(new Font(Theme.FONT_NAME, Font.BOLD, 18));
         lblFormTitle.setForeground(Theme.TEXT_WHITE);
+        lblFormTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         lblFormSubtitle = new JLabel("Lengkapi identitas sebelum menyimpan.");
         lblFormSubtitle.setFont(Theme.caption());
         lblFormSubtitle.setForeground(Theme.TEXT_DIM);
+        lblFormSubtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         formHeader.add(lblFormTitle);
-        formHeader.add(Box.createVerticalStrut(2));
+        formHeader.add(Box.createVerticalStrut(4));
         formHeader.add(lblFormSubtitle);
-        formHeader.add(Box.createVerticalStrut(14));
+        formHeader.add(Box.createVerticalStrut(18));
 
-        // Form Fields
+        // Form Fields (Vertical Box, semua LEFT_ALIGNMENT)
         JPanel formFields = new JPanel();
         formFields.setLayout(new BoxLayout(formFields, BoxLayout.Y_AXIS));
         formFields.setOpaque(false);
 
         // Nama Lengkap
         formFields.add(createFieldLabel("Nama lengkap"));
+        formFields.add(Box.createVerticalStrut(6));
         txtNama = new UIComponents.ModernTextField("Dinda Maharani");
         txtNama.setText("Dinda Maharani");
-        txtNama.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        txtNama.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtNama.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        txtNama.setPreferredSize(new Dimension(280, 40));
         formFields.add(txtNama);
-        formFields.add(Box.createVerticalStrut(10));
+        formFields.add(Box.createVerticalStrut(14));
 
         // NIK KTP + Live Validation Message
         formFields.add(createFieldLabel("NIK KTP"));
+        formFields.add(Box.createVerticalStrut(6));
         txtNik = new UIComponents.ModernTextField("327601120304");
         txtNik.setText("327601120304"); // Default seperti di screenshot Figma (12/16)
-        txtNik.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        txtNik.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtNik.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        txtNik.setPreferredSize(new Dimension(280, 40));
         formFields.add(txtNik);
 
         lblNikValidation = new JLabel("NIK harus terdiri dari 16 digit. (12/16)");
         lblNikValidation.setFont(Theme.caption());
-        lblNikValidation.setForeground(Theme.BADGE_RED_TXT); // Merah seperti di Figma
-        lblNikValidation.setBorder(new EmptyBorder(4, 2, 4, 0));
+        lblNikValidation.setForeground(Theme.BADGE_RED_TXT);
+        lblNikValidation.setBorder(new EmptyBorder(6, 2, 8, 0));
+        lblNikValidation.setAlignmentX(Component.LEFT_ALIGNMENT);
         formFields.add(lblNikValidation);
 
         txtNik.getDocument().addDocumentListener(new DocumentListener() {
@@ -348,68 +303,81 @@ public class PelangganPanel extends JPanel {
 
         // Nomor Telepon
         formFields.add(createFieldLabel("Nomor telepon"));
+        formFields.add(Box.createVerticalStrut(6));
         txtTelepon = new UIComponents.ModernTextField("0812 5678 9012");
         txtTelepon.setText("0812 5678 9012");
-        txtTelepon.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        txtTelepon.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtTelepon.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        txtTelepon.setPreferredSize(new Dimension(280, 40));
         formFields.add(txtTelepon);
-        formFields.add(Box.createVerticalStrut(10));
+        formFields.add(Box.createVerticalStrut(14));
 
         // Alamat
         formFields.add(createFieldLabel("Alamat"));
+        formFields.add(Box.createVerticalStrut(6));
         txtAlamat = new UIComponents.ModernTextField("Jl. Merdeka No. 24, Bekasi");
         txtAlamat.setText("Jl. Merdeka No. 24, Bekasi");
-        txtAlamat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+        txtAlamat.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtAlamat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
+        txtAlamat.setPreferredSize(new Dimension(280, 48));
         formFields.add(txtAlamat);
-        formFields.add(Box.createVerticalStrut(12));
+        formFields.add(Box.createVerticalStrut(16));
 
         // Checkbox SIM A
         chkSimA = new JCheckBox("Memiliki SIM A yang masih berlaku");
-        chkSimA.setOpaque(false);
+        UIComponents.styleCheckBox(chkSimA);
         chkSimA.setForeground(Theme.TEXT_WHITE);
-        chkSimA.setFont(Theme.bodyRegular());
+        chkSimA.setFont(Theme.captionBold());
         chkSimA.setSelected(true);
+        chkSimA.setAlignmentX(Component.LEFT_ALIGNMENT);
         formFields.add(chkSimA);
-        formFields.add(Box.createVerticalStrut(4));
+        formFields.add(Box.createVerticalStrut(10));
 
         lblWarningNik = new JLabel("Periksa kembali NIK untuk melanjutkan.");
         lblWarningNik.setFont(Theme.caption());
         lblWarningNik.setForeground(Theme.BADGE_RED_TXT);
+        lblWarningNik.setAlignmentX(Component.LEFT_ALIGNMENT);
         formFields.add(lblWarningNik);
 
-        // Buttons
-        JPanel btnRow = new JPanel(new GridLayout(1, 2, 10, 0));
+        // Buttons (65% / 35%)
+        JPanel btnRow = new JPanel(new GridBagLayout());
         btnRow.setOpaque(false);
         btnRow.setBorder(new EmptyBorder(16, 0, 0, 0));
+        GridBagConstraints bgbc = new GridBagConstraints();
+        bgbc.fill = GridBagConstraints.BOTH;
+        bgbc.weighty = 1.0;
 
         btnSimpan = new UIComponents.ModernButton("Simpan pelanggan", UIComponents.ModernButton.Type.PRIMARY);
+        btnSimpan.setPreferredSize(new Dimension(180, 44));
         btnSimpan.addActionListener(e -> simpanDataPelanggan());
 
         btnBatal = new UIComponents.ModernButton("Batal", UIComponents.ModernButton.Type.SECONDARY);
+        btnBatal.setPreferredSize(new Dimension(100, 44));
         btnBatal.addActionListener(e -> resetFormToAddNew());
 
-        btnRow.add(btnSimpan);
-        btnRow.add(btnBatal);
+        bgbc.gridx = 0;
+        bgbc.weightx = 0.65;
+        bgbc.insets = new Insets(0, 0, 0, 10);
+        btnRow.add(btnSimpan, bgbc);
 
-        JScrollPane scrollForm = new JScrollPane(formFields);
-        scrollForm.setBorder(null);
-        scrollForm.setOpaque(false);
-        scrollForm.getViewport().setOpaque(false);
+        bgbc.gridx = 1;
+        bgbc.weightx = 0.35;
+        bgbc.insets = new Insets(0, 0, 0, 0);
+        btnRow.add(btnBatal, bgbc);
 
         card.add(formHeader, BorderLayout.NORTH);
-        card.add(scrollForm, BorderLayout.CENTER);
+        card.add(formFields, BorderLayout.CENTER);
         card.add(btnRow, BorderLayout.SOUTH);
 
-        // Jalankan validasi awal
         validateNikInput();
-
         return card;
     }
 
     private JLabel createFieldLabel(String text) {
         JLabel l = new JLabel(text);
-        l.setFont(Theme.captionBold());
-        l.setForeground(Theme.TEXT_DIM);
-        l.setBorder(new EmptyBorder(4, 0, 4, 0));
+        l.setFont(Theme.caption());
+        l.setForeground(Theme.TEXT_MUTED);
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
         return l;
     }
 
@@ -419,7 +387,7 @@ public class PelangganPanel extends JPanel {
         if (len == 16) {
             lblNikValidation.setText("NIK valid 16 digit. (16/16)");
             lblNikValidation.setForeground(Theme.BADGE_GREEN_TXT);
-            lblWarningNik.setText("");
+            lblWarningNik.setText(" ");
             txtNik.setError(false);
         } else {
             lblNikValidation.setText("NIK harus terdiri dari 16 digit. (" + len + "/16)");
@@ -438,9 +406,9 @@ public class PelangganPanel extends JPanel {
         try {
             int total = controller.getAllPelanggan().size();
             int aktif = controller.getTransaksiAktif().size();
-            cardTotal.updateData(String.valueOf(Math.max(128, total)), "Tercatat dalam sistem");
-            cardAktif.updateData(String.valueOf(Math.max(16, aktif)), "Sedang dalam masa sewa");
-            cardBaru.updateData("12", "Peningkatan 15% dari bulan lalu");
+            cardTotal.updateData(String.valueOf(Math.max(128, total)), "");
+            cardAktif.updateData(String.valueOf(Math.max(16, aktif)), "");
+            cardBaru.updateData("12", "");
         } catch (SQLException ignored) {}
     }
 
@@ -457,31 +425,43 @@ public class PelangganPanel extends JPanel {
             }
 
             tableModel.setRowCount(0);
+            int idx = 0;
             for (Pelanggan p : currentPelangganList) {
+                if (idx >= 6) break;
                 tableModel.addRow(new Object[]{
-                        p.getNamaLengkap(),
+                        p.getNamaLengkap() + "\n" + p.getIdPelanggan(),
                         p.getMaskedNik(),
-                        p.getNoTelepon(),
+                        formatPhone(p.getNoTelepon()),
                         p.isMemilikiSimA() ? "Ada" : "Tidak",
-                        "Aksi"
+                        "Ubah\nHapus"
                 });
+                idx++;
             }
-            lblPagination.setText("Menampilkan 1-" + currentPelangganList.size() + " dari " + Math.max(128, currentPelangganList.size()) + " pelanggan");
+            lblPagination.setText("Menampilkan 1–" + Math.min(6, currentPelangganList.size()) + " dari " + Math.max(128, currentPelangganList.size()) + " pelanggan");
 
         } catch (SQLException e) {
             System.err.println("Gagal memfilter data pelanggan: " + e.getMessage());
         }
     }
 
+    private String formatPhone(String raw) {
+        if (raw == null) return "";
+        String digits = raw.replaceAll("[^0-9]", "");
+        if (digits.length() == 12) {
+            return digits.substring(0, 4) + " " + digits.substring(4, 8) + " " + digits.substring(8);
+        }
+        return raw;
+    }
+
     private void populateFormForEdit(Pelanggan p) {
         selectedPelangganId = p.getIdPelanggan();
         lblFormTitle.setText("Edit pelanggan");
-        lblFormSubtitle.setText(p.getIdPelanggan() + " / " + p.getNamaLengkap());
+        lblFormSubtitle.setText(p.getIdPelanggan() + "  /  " + p.getNamaLengkap());
         btnSimpan.setText("Simpan perubahan");
 
         txtNama.setText(p.getNamaLengkap());
         txtNik.setText(p.getNikKtp());
-        txtTelepon.setText(p.getNoTelepon());
+        txtTelepon.setText(formatPhone(p.getNoTelepon()));
         txtAlamat.setText(p.getAlamat());
         chkSimA.setSelected(p.isMemilikiSimA());
 
@@ -509,7 +489,7 @@ public class PelangganPanel extends JPanel {
     private void simpanDataPelanggan() {
         String nik = txtNik.getText().replaceAll("[^0-9]", "");
         if (nik.length() != 16) {
-            // TAMPILKAN POP-UP EKSEPSI PERSIS SEPERTI GAMBAR CONTOH USER (Image 7)
+            // TAMPILKAN POP-UP EKSEPSI "Periksa kembali NIK" PERSIS SEPERTI GAMBAR MOCKUP
             CustomDialog.showNikError(SwingUtilities.getWindowAncestor(this), () -> {
                 txtNik.requestFocus();
                 txtNik.selectAll();
@@ -519,9 +499,13 @@ public class PelangganPanel extends JPanel {
 
         try {
             String nama = txtNama.getText().trim();
-            String telp = txtTelepon.getText().trim();
+            String telp = txtTelepon.getText().replaceAll("\\s+", "");
             String alamat = txtAlamat.getText().trim();
             boolean simA = chkSimA.isSelected();
+
+            if (selectedPelangganId == null) {
+                selectedPelangganId = controller.generateNextPelangganId();
+            }
 
             controller.simpanPelanggan(selectedPelangganId, nik, nama, telp, alamat, simA);
 
@@ -531,7 +515,7 @@ public class PelangganPanel extends JPanel {
             mainFrame.getTransaksiPanel().loadDropdowns();
 
         } catch (SQLException dbEx) {
-            // TAMPILKAN POP-UP EKSEPSI DATABASE GAGAL PERSIS SEPERTI GAMBAR CONTOH USER (Image 6)
+            // TAMPILKAN POP-UP EKSEPSI "Koneksi database gagal" PERSIS SEPERTI GAMBAR MOCKUP
             CustomDialog.showDatabaseError(SwingUtilities.getWindowAncestor(this), this::simpanDataPelanggan);
         } catch (Exception ex) {
             CustomDialog.showWarning(SwingUtilities.getWindowAncestor(this), "Validasi Gagal", ex.getMessage(), "Periksa Data", () -> txtNama.requestFocus());

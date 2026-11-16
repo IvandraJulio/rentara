@@ -107,6 +107,6 @@ public abstract class Kendaraan implements DapatDisewa {
 
     @Override
     public String toString() {
-        return "[" + getKategori() + "] " + merk + " (" + platNomor + ") - Rp" + String.format("%,.0f", tarifDasarHarian) + "/hari";
+        return merk + "  ·  " + platNomor + (statusTersedia ? "" : " (Disewa)");
     }
 }
