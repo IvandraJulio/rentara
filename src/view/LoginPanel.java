@@ -14,6 +14,7 @@ import java.io.File;
  * Panel Login Petugas (LoginPanel)
  * Mereplikasi tampilan '00 · Login petugas' dari Figma secara 1:1.
  */
+@SuppressWarnings("serial")
 public class LoginPanel extends UIComponents.AmbientBackgroundPanel {
     private final RentalController controller;
     private final MainFrame mainFrame;
@@ -274,7 +275,7 @@ public class LoginPanel extends UIComponents.AmbientBackgroundPanel {
 
         // Input 3: Masuk sebagai
         formBox.add(createInputLabel("Masuk sebagai"));
-        cmbRole = new JComboBox<>(new String[]{"Admin", "Petugas Rental"});
+        cmbRole = new JComboBox<>(new String[]{"Admin"});
         UIComponents.styleComboBox(cmbRole);
         cmbRole.setAlignmentX(Component.LEFT_ALIGNMENT);
         cmbRole.setMaximumSize(new Dimension(440, 44));
@@ -317,7 +318,7 @@ public class LoginPanel extends UIComponents.AmbientBackgroundPanel {
         noticeRow.setOpaque(false);
         noticeRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         noticeRow.setMaximumSize(new Dimension(440, 24));
-        JLabel lblNotice = new JLabel("Akses khusus admin dan petugas rental.");
+        JLabel lblNotice = new JLabel("Akses khusus administrator rental.");
         lblNotice.setFont(Theme.caption());
         lblNotice.setForeground(Theme.TEXT_DIM);
         noticeRow.add(lblNotice);

@@ -26,6 +26,7 @@ import java.util.List;
  * mendukung operasi CRUD, filter kategori polimorfik, pencarian instan,
  * ekspor CSV, dan pop-up eksepsi CustomDialog.
  */
+@SuppressWarnings("serial")
 public class KendaraanPanel extends JPanel {
     private final RentalController controller;
     private final MainFrame mainFrame;
@@ -264,7 +265,7 @@ public class KendaraanPanel extends JPanel {
         tableKendaraan.getColumnModel().getColumn(1).setPreferredWidth(85);
         tableKendaraan.getColumnModel().getColumn(2).setPreferredWidth(115);
         tableKendaraan.getColumnModel().getColumn(3).setPreferredWidth(115);
-        tableKendaraan.getColumnModel().getColumn(4).setPreferredWidth(75);
+        tableKendaraan.getColumnModel().getColumn(4).setPreferredWidth(125);
 
         // Custom Painted Renderers (100% bebas masalah hilang di JTable)
         tableKendaraan.getColumnModel().getColumn(0).setCellRenderer(new UIComponents.TwoLineTableRenderer());
@@ -280,10 +281,11 @@ public class KendaraanPanel extends JPanel {
                 int col = tableKendaraan.columnAtPoint(e.getPoint());
                 if (row >= 0 && currentKendaraanList != null && row < currentKendaraanList.size()) {
                     Kendaraan k = currentKendaraanList.get(row);
+                    tableKendaraan.setRowSelectionInterval(row, row);
                     if (col == 4) {
                         Rectangle cellRect = tableKendaraan.getCellRect(row, col, false);
-                        int yInCell = e.getY() - cellRect.y;
-                        if (yInCell <= cellRect.height / 2) {
+                        int xInCell = e.getX() - cellRect.x;
+                        if (xInCell <= 59) {
                             populateFormForEdit(k);
                         } else {
                             confirmHapusKendaraan(k);
@@ -291,25 +293,19 @@ public class KendaraanPanel extends JPanel {
                     } else {
                         populateFormForEdit(k);
                     }
-                    tableKendaraan.setRowSelectionInterval(row, row);
                 }
             }
         });
 
-        // Footer Pagination
+        // Footer Info Data
         JPanel footer = new JPanel(new BorderLayout());
         footer.setOpaque(false);
         footer.setBorder(new EmptyBorder(6, 4, 0, 4));
-        lblPagination = new JLabel("Menampilkan 1–6 dari 48 kendaraan");
+        lblPagination = new JLabel("Menampilkan 0 kendaraan");
         lblPagination.setFont(Theme.caption());
         lblPagination.setForeground(Theme.TEXT_DIM);
 
-        JLabel lblPager = new JLabel("‹   1   2   3   ...   8   ›");
-        lblPager.setFont(Theme.captionBold());
-        lblPager.setForeground(Theme.TEXT_MUTED);
-
         footer.add(lblPagination, BorderLayout.WEST);
-        footer.add(lblPager, BorderLayout.EAST);
 
         card.add(searchRow, BorderLayout.NORTH);
         card.add(UIComponents.wrapTableWithHeader(tableKendaraan, null), BorderLayout.CENTER);
@@ -622,13 +618,13 @@ public class KendaraanPanel extends JPanel {
             int avail = controller.getKendaraanTersedia().size();
             int rented = total - avail;
 
-            btnFilterAll.setText("Semua armada   " + Math.max(48, total));
-            btnFilterMobil.setText("Mobil   " + Math.max(28, mobil));
-            btnFilterMotor.setText("Motor   " + Math.max(16, motor));
-            btnFilterBus.setText("Bus   " + Math.max(4, bus));
+            btnFilterAll.setText("Semua armada   " + total);
+            btnFilterMobil.setText("Mobil   " + mobil);
+            btnFilterMotor.setText("Motor   " + motor);
+            btnFilterBus.setText("Bus   " + bus);
 
-            lblAvailableCount.setText("●  " + Math.max(32, avail) + " unit tersedia");
-            lblRentedCount.setText(Math.max(16, rented) + " disewa");
+            lblAvailableCount.setText("●  " + avail + " unit tersedia");
+            lblRentedCount.setText(rented + " disewa");
         } catch (SQLException ignored) {}
     }
 
@@ -646,21 +642,19 @@ public class KendaraanPanel extends JPanel {
         String status = (String) cmbStatusFilter.getSelectedItem();
 
         try {
+            int totalAll = controller.getAllKendaraan().size();
             currentKendaraanList = controller.filterKendaraan(kw, activeCategoryFilter, status);
             tableModel.setRowCount(0);
-            int idx = 0;
             for (Kendaraan k : currentKendaraanList) {
-                if (idx >= 6) break;
                 tableModel.addRow(new Object[]{
                         k.getMerk() + "\n" + k.getPlatNomor() + " · " + k.getTahun(),
                         k.getKategori(),
                         String.format("Rp%,.0f", k.getTarifDasarHarian()).replace(',', '.'),
                         k.isStatusTersedia() ? "Tersedia" : "Disewa",
-                        "Ubah\nHapus"
+                        "Ubah | Hapus"
                 });
-                idx++;
             }
-            lblPagination.setText("Menampilkan 1–" + Math.min(6, currentKendaraanList.size()) + " dari " + Math.max(48, currentKendaraanList.size()) + " kendaraan");
+            lblPagination.setText("Menampilkan " + currentKendaraanList.size() + " dari " + totalAll + " kendaraan");
 
             if (!currentKendaraanList.isEmpty() && selectedKendaraanId == null) {
                 populateFormForEdit(currentKendaraanList.get(0));

@@ -83,6 +83,20 @@ public class PelangganDAO implements CrudRepository<Pelanggan> {
         return null;
     }
 
+    public Pelanggan cariBerdasarkanNik(String nik) throws SQLException {
+        String sql = "SELECT * FROM pelanggan WHERE nik_ktp = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nik);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToPelanggan(rs);
+                }
+            }
+        }
+        return null;
+    }
+
     public List<Pelanggan> cariBerdasarkanKriteria(String kataKunci) throws SQLException {
         List<Pelanggan> list = new ArrayList<>();
         String sql = "SELECT * FROM pelanggan WHERE LOWER(nama_lengkap) LIKE ? OR LOWER(nik_ktp) LIKE ? OR LOWER(id_pelanggan) LIKE ? ORDER BY id_pelanggan ASC";
@@ -120,19 +134,24 @@ public class PelangganDAO implements CrudRepository<Pelanggan> {
     }
 
     public String generateNextId() throws SQLException {
-        String sql = "SELECT id_pelanggan FROM pelanggan ORDER BY id_pelanggan DESC LIMIT 1";
+        String sql = "SELECT id_pelanggan FROM pelanggan";
+        int maxNum = 0;
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next()) {
-                String lastId = rs.getString(1); // PLG-007
-                if (lastId != null && lastId.startsWith("PLG-")) {
-                    int num = Integer.parseInt(lastId.substring(4));
-                    return String.format("PLG-%03d", num + 1);
+            while (rs.next()) {
+                String id = rs.getString(1);
+                if (id != null && id.startsWith("PLG-")) {
+                    try {
+                        int num = Integer.parseInt(id.substring(4).trim());
+                        if (num > maxNum) {
+                            maxNum = num;
+                        }
+                    } catch (NumberFormatException ignored) {}
                 }
             }
-        } catch (Exception ignored) {}
-        return "PLG-001";
+        }
+        return String.format("PLG-%03d", maxNum + 1);
     }
 
     private Pelanggan mapResultSetToPelanggan(ResultSet rs) throws SQLException {

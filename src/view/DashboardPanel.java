@@ -21,6 +21,7 @@ import java.util.Map;
  * Panel Dashboard Utama (DashboardPanel)
  * Mereplikasi tampilan '01 · Dashboard' dari Figma secara 1:1.
  */
+@SuppressWarnings("serial")
 public class DashboardPanel extends JPanel {
     private final RentalController controller;
     private final MainFrame mainFrame;
@@ -429,31 +430,31 @@ public class DashboardPanel extends JPanel {
         int mobil = (int) stats.getOrDefault("mobilCount", 0);
         int motor = (int) stats.getOrDefault("motorCount", 0);
         int bus = (int) stats.getOrDefault("busCount", 0);
+        double pendapatan = (double) stats.getOrDefault("pendapatan", 0.0);
 
-        cardTotalArmada.updateData(String.valueOf(Math.max(48, totalArmada)), "Mobil " + Math.max(28, mobil) + " · Motor " + Math.max(16, motor) + " · Bus " + Math.max(4, bus));
-        cardTersedia.updateData(String.valueOf(Math.max(32, armadaTersedia)), "Siap untuk disewakan");
-        cardDisewa.updateData(String.valueOf(Math.max(16, armadaDisewa)), "33% utilisasi armada");
-        cardPendapatan.updateData("Rp24,8 jt", "+ 8,2% dari bulan lalu");
+        int utilPct = totalArmada > 0 ? (int) Math.round((armadaDisewa * 100.0) / totalArmada) : 0;
+        String pendapatanStr = String.format("Rp%,.0f", pendapatan).replace(',', '.');
+
+        cardTotalArmada.updateData(String.valueOf(totalArmada), "Mobil " + mobil + " · Motor " + motor + " · Bus " + bus);
+        cardTersedia.updateData(String.valueOf(armadaTersedia), "Siap untuk disewakan");
+        cardDisewa.updateData(String.valueOf(armadaDisewa), utilPct + "% utilisasi armada");
+        cardPendapatan.updateData(pendapatanStr, "Total nilai transaksi");
 
         tableModel.setRowCount(0);
         @SuppressWarnings("unchecked")
         List<TransaksiSewa> dueList = (List<TransaksiSewa>) stats.get("pengembalianHariIni");
         if (dueList != null) {
-            lblSubDue.setText(Math.min(4, dueList.size()) + " transaksi perlu ditindaklanjuti");
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM");
-            String[] times = {"10.00", "12.00", "14.00", "16.00", "17.00"};
-            int idx = 0;
+            lblSubDue.setText(dueList.size() + " transaksi perlu ditindaklanjuti");
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM yyyy");
             for (TransaksiSewa t : dueList) {
-                if (idx >= 4) break;
                 tableModel.addRow(new Object[]{
                         t.getIdTransaksi(),
                         t.getPelanggan().getNamaLengkap(),
                         t.getKendaraan().getMerk() + " · " + t.getKendaraan().getPlatNomor(),
-                        t.getTanggalRencanaKembali().format(dtf) + " · " + times[idx % times.length],
-                        "Disewa",
+                        t.getTanggalRencanaKembali().format(dtf),
+                        t.getStatusTransaksi(),
                         "Kembalikan →"
                 });
-                idx++;
             }
         }
     }

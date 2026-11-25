@@ -21,6 +21,7 @@ import java.util.List;
  * dilengkapi kalkulasi biaya sewa otomatis polimorfik, denda keterlambatan,
  * serta pop-up eksepsi CustomDialog "Kendaraan tidak tersedia" dan "Koneksi database gagal".
  */
+@SuppressWarnings("serial")
 public class TransaksiPanel extends JPanel {
     private final RentalController controller;
     private final MainFrame mainFrame;
@@ -822,7 +823,7 @@ public class TransaksiPanel extends JPanel {
                         statusTampil
                 });
             }
-            lblActiveCount.setText(Math.max(16, aktifCount) + " aktif");
+            lblActiveCount.setText(aktifCount + " aktif");
         } catch (SQLException e) {
             System.err.println("Gagal memuat tabel transaksi: " + e.getMessage());
         }

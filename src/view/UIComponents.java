@@ -9,7 +9,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom. Path2D;
 import java.awt.geom.RoundRectangle2D;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -20,6 +19,7 @@ import java.util.List;
  * Komponen Antarmuka Grafis Kustom (UIComponents)
  * Dirancang untuk mereplikasi estetika desain Figma pada Rentara Management System secara 1:1.
  */
+@SuppressWarnings("serial")
 public class UIComponents {
 
     /**
@@ -375,7 +375,6 @@ public class UIComponents {
                 g2.setColor(Theme.TEXT_DIM);
                 g2.setFont(Theme.captionBold());
                 FontMetrics fm = g2.getFontMetrics();
-                String badge = "⌘ K";
                 // Draw clover/command symbol manually + K so it never shows a missing glyph box
                 int bx = w - 36;
                 int cy = h / 2;
@@ -1121,7 +1120,7 @@ public class UIComponents {
     }
 
     /**
-     * Renderer Sel Aksi ("Ubah" di atas & "Hapus" di bawah seperti di Figma)
+     * Renderer Sel Aksi ("Ubah" di kiri & "Hapus" di kanan sebagai tombol aksi bersih)
      */
     public static class StackedActionTableRenderer extends DefaultTableCellRenderer {
         @Override
@@ -1139,15 +1138,32 @@ public class UIComponents {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             int h = getHeight();
-            int x = 10;
+            int btnH = 26;
+            int y = (h - btnH) / 2;
 
             g2.setFont(Theme.captionBold());
-            g2.setColor(Theme.ACCENT_ORANGE);
-            g2.drawString("Ubah", x, h / 2 - 3);
+            FontMetrics fm = g2.getFontMetrics();
+            int textY = y + (btnH - fm.getHeight()) / 2 + fm.getAscent();
 
-            g2.setFont(Theme.caption());
+            // Tombol Ubah
+            int ubahW = 48;
+            int ubahX = 8;
+            g2.setColor(new Color(0x3A, 0x2E, 0x26));
+            g2.fill(new RoundRectangle2D.Float(ubahX, y, ubahW, btnH, 8, 8));
+            g2.setColor(new Color(0xFF, 0xAA, 0x72, 90));
+            g2.draw(new RoundRectangle2D.Float(ubahX, y, ubahW, btnH, 8, 8));
+            g2.setColor(Theme.ACCENT_ORANGE);
+            g2.drawString("Ubah", ubahX + (ubahW - fm.stringWidth("Ubah")) / 2, textY);
+
+            // Tombol Hapus
+            int hapusW = 54;
+            int hapusX = ubahX + ubahW + 6;
+            g2.setColor(new Color(0x3A, 0x22, 0x28));
+            g2.fill(new RoundRectangle2D.Float(hapusX, y, hapusW, btnH, 8, 8));
+            g2.setColor(new Color(0xFF, 0xA5, 0xAB, 90));
+            g2.draw(new RoundRectangle2D.Float(hapusX, y, hapusW, btnH, 8, 8));
             g2.setColor(Theme.BADGE_RED_TXT);
-            g2.drawString("Hapus", x, h / 2 + 13);
+            g2.drawString("Hapus", hapusX + (hapusW - fm.stringWidth("Hapus")) / 2, textY);
 
             g2.dispose();
         }
@@ -1216,24 +1232,28 @@ public class UIComponents {
         });
 
         JTableHeader header = table.getTableHeader();
-        header.setBackground(new Color(0x22, 0x23, 0x2A));
-        header.setForeground(Theme.TEXT_DIM);
-        header.setFont(Theme.caption());
-        header.setPreferredSize(new Dimension(800, 34));
+        header.setBackground(new Color(0x1E, 0x20, 0x28));
+        header.setForeground(Theme.TEXT_MUTED);
+        header.setFont(Theme.captionBold());
+        header.setPreferredSize(new Dimension(800, 38));
         header.setReorderingAllowed(false);
         header.setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
                 JLabel l = (JLabel) super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, col);
-                l.setOpaque(false);
-                l.setForeground(Theme.TEXT_DIM);
-                l.setFont(Theme.caption());
-                l.setBorder(new EmptyBorder(4, 12, 8, 12));
+                l.setOpaque(true);
+                l.setBackground(new Color(0x1E, 0x20, 0x28));
+                l.setForeground(Theme.TEXT_MUTED);
+                l.setFont(Theme.captionBold());
+                l.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(0x34, 0x36, 0x42)),
+                        new EmptyBorder(6, 12, 6, 12)
+                ));
                 l.setHorizontalAlignment(SwingConstants.LEFT);
                 return l;
             }
         });
-        header.setOpaque(false);
+        header.setOpaque(true);
     }
 
     /**

@@ -11,9 +11,12 @@ import java.awt.geom.RoundRectangle2D;
 
 /**
  * Jendela Utama Aplikasi (MainFrame)
- * Memuat tata letak menyeluruh: Sidebar navigasi vertikal membulat, Top Header bar,
- * latar belakang ambient glow, dan CardLayout antarmuka utama (Dashboard, Armada, Pelanggan, Transaksi).
+ * Memuat tata letak menyeluruh: Sidebar navigasi vertikal membulat, Top Header
+ * bar,
+ * latar belakang ambient glow, dan CardLayout antarmuka utama (Dashboard,
+ * Armada, Pelanggan, Transaksi).
  */
+@SuppressWarnings("serial")
 public class MainFrame extends JFrame {
     private final RentalController controller;
 
@@ -292,7 +295,8 @@ public class MainFrame extends JFrame {
         right.add(bellBtn);
 
         // Admin Profile Pill (Person Icon + "Admin Rental" / "Petugas operasional")
-        UIComponents.ModernCard profilePill = new UIComponents.ModernCard(new Color(0x27, 0x29, 0x32, 220), new Color(0xFF, 0xFF, 0xFF, 28), 14);
+        UIComponents.ModernCard profilePill = new UIComponents.ModernCard(new Color(0x27, 0x29, 0x32, 220),
+                new Color(0xFF, 0xFF, 0xFF, 28), 14);
         profilePill.setLayout(new BorderLayout(10, 0));
         profilePill.setBorder(new EmptyBorder(6, 12, 6, 18));
         profilePill.setPreferredSize(new Dimension(190, 42));
@@ -326,7 +330,7 @@ public class MainFrame extends JFrame {
         lblAdminName.setFont(Theme.captionBold());
         lblAdminName.setForeground(Theme.TEXT_WHITE);
 
-        JLabel lblAdminRole = new JLabel("Petugas operasional");
+        JLabel lblAdminRole = new JLabel("Administrator");
         lblAdminRole.setFont(new Font(Theme.FONT_NAME, Font.PLAIN, 10));
         lblAdminRole.setForeground(Theme.TEXT_DIM);
 
@@ -361,7 +365,8 @@ public class MainFrame extends JFrame {
                 options[0]);
 
         if (choice == 0) {
-            CustomDialog.showDatabaseError(this, () -> {});
+            CustomDialog.showDatabaseError(this, () -> {
+            });
         } else if (choice == 1) {
             CustomDialog.showNikError(this, () -> showPage("PELANGGAN"));
         } else if (choice == 2) {
@@ -420,7 +425,8 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * Tombol Ikon Navigasi Sidebar Khusus dengan Bar Indikator Oranye Aktif di Tepi Kiri
+     * Tombol Ikon Navigasi Sidebar Khusus dengan Bar Indikator Oranye Aktif di Tepi
+     * Kiri
      */
     private static class SidebarNavButton extends JButton {
         private final String type;

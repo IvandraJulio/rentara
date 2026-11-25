@@ -11,7 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,6 +194,11 @@ public class RentalController {
 
         if (id == null || id.trim().isEmpty()) {
             id = pelangganDAO.generateNextId();
+        }
+
+        Pelanggan existingByNik = pelangganDAO.cariBerdasarkanNik(nik.trim());
+        if (existingByNik != null && !existingByNik.getIdPelanggan().equalsIgnoreCase(id.trim())) {
+            throw new IllegalArgumentException("NIK KTP " + nik + " sudah terdaftar atas nama " + existingByNik.getNamaLengkap() + ".");
         }
 
         Pelanggan p = new Pelanggan(id, nik, nama, telepon, alamat, simA);

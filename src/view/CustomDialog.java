@@ -14,6 +14,7 @@ import java.awt.geom.RoundRectangle2D;
  * 2. Periksa kembali NIK (Warning icon (!), "Tutup" & "Perbaiki data")
  * 3. Kendaraan tidak tersedia (Crossed-out car icon, "Tutup" & "Pilih kendaraan")
  */
+@SuppressWarnings("serial")
 public class CustomDialog extends JDialog {
     public enum IconType { DATABASE_ERROR, NIK_WARNING, CAR_UNAVAILABLE, GENERAL_ERROR, SUCCESS }
 
